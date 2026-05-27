@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QS Manager — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#090C12;--surface:#0F1219;--card:#161C27;--card2:#1C2333;--card3:#212B3C;
+  --primary:#F97316;--primary-d:rgba(249,115,22,.12);--primary-b:rgba(249,115,22,.25);
+  --cyan:#22D3EE;--success:#22C55E;--warning:#EAB308;--danger:#EF4444;--purple:#A78BFA;
+  --text:#E2E8F0;--muted:#64748B;--dim:#94A3B8;
+  --border:#1E2940;--border2:#253044;
+  --sidebar-w:260px;
+  --fdisp:'Barlow Condensed',sans-serif;
+  --fbody:'DM Sans',sans-serif;--fmono:'JetBrains Mono',monospace
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--fbody);background:var(--bg);color:var(--text);display:flex;min-height:100vh;overflow-x:hidden}
+
+/* ── SIDEBAR ──────────────────────────────────────────── */
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;
+  transition:transform .3s}
+.sb-top{padding:24px 20px;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-ico{width:42px;height:42px;background:var(--primary);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;
+  box-shadow:0 6px 18px rgba(249,115,22,.35);flex-shrink:0}
+.logo-nm{font-family:var(--fdisp);font-size:18px;font-weight:800;letter-spacing:1.5px}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase}
+
+.sb-nav{flex:1;padding:16px 12px;overflow-y:auto}
+.nav-section{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;
+  padding:16px 8px 8px;font-weight:600}
+.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;
+  color:var(--dim);font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;
+  text-decoration:none;margin-bottom:2px}
+.nav-item:hover{background:var(--primary-d);color:var(--text)}
+.nav-item.active{background:var(--primary-d);color:var(--primary);border-left:3px solid var(--primary);padding-left:9px}
+.nav-item i{width:18px;text-align:center;font-size:14px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--primary);color:#fff;font-size:10px;
+  padding:2px 7px;border-radius:20px;font-family:var(--fmono)}
+
+.sb-foot{padding:16px 12px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;
+  background:var(--card2);border-radius:10px}
+.user-av{width:36px;height:36px;background:var(--primary-d);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:15px;flex-shrink:0}
+.user-nm{font-size:13px;font-weight:600}
+.user-role{font-size:10px;color:var(--muted);text-transform:capitalize}
+.btn-logout{margin-left:auto;color:var(--muted);cursor:pointer;font-size:14px;
+  transition:color .2s;background:none;border:none;padding:4px}
+.btn-logout:hover{color:var(--danger)}
+
+/* ── MAIN ─────────────────────────────────────────────── */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 28px;height:60px;display:flex;align-items:center;gap:16px;
+  position:sticky;top:0;z-index:90}
+.menu-btn{display:none;background:none;border:none;color:var(--dim);font-size:18px;
+  cursor:pointer;padding:8px}
+.page-title{font-family:var(--fdisp);font-size:20px;font-weight:700;letter-spacing:.5px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.btn-refresh{display:flex;align-items:center;gap:7px;padding:8px 16px;
+  background:var(--primary-d);border:1px solid var(--primary-b);border-radius:8px;
+  color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-refresh:hover{background:var(--primary);color:#fff}
+.time-badge{font-family:var(--fmono);font-size:11px;color:var(--muted)}
+
+/* CONTENT */
+.content{padding:28px;flex:1}
+.section-title{font-family:var(--fdisp);font-size:22px;font-weight:700;letter-spacing:.5px;
+  margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:28px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  padding:20px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
+.stat-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card.c-orange::before{background:var(--primary)}
+.stat-card.c-cyan::before{background:var(--cyan)}
+.stat-card.c-green::before{background:var(--success)}
+.stat-card.c-purple::before{background:var(--purple)}
+.stat-card.c-yellow::before{background:var(--warning)}
+.stat-card.c-red::before{background:var(--danger)}
+
+.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px;font-weight:600}
+.stat-val{font-family:var(--fmono);font-size:30px;font-weight:500;margin-bottom:4px;line-height:1}
+.stat-sub{font-size:12px;color:var(--muted)}
+.stat-ico{position:absolute;top:18px;right:18px;font-size:28px;opacity:.08}
+
+/* CHART GRID */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:28px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px}
+.chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.chart-title{font-family:var(--fdisp);font-size:16px;font-weight:700;letter-spacing:.5px}
+.chart-badge{font-size:10px;color:var(--primary);background:var(--primary-d);
+  padding:3px 10px;border-radius:20px;font-weight:600;letter-spacing:1px}
+canvas{max-height:260px}
+
+/* TABLE */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:14px;
+  overflow:hidden;margin-bottom:28px}
+.table-head{padding:20px 24px;display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--border)}
+.table-title{font-family:var(--fdisp);font-size:16px;font-weight:700;letter-spacing:.5px}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);
+  padding:12px 20px;text-align:left;background:var(--card2);font-weight:600}
+.tbl td{padding:13px 20px;font-size:13px;border-top:1px solid var(--border);color:var(--dim)}
+.tbl tr:hover td{background:rgba(255,255,255,.02);color:var(--text)}
+.tbl .mono{font-family:var(--fmono);font-size:12px}
+.badge{display:inline-flex;align-items:center;font-size:10px;padding:3px 9px;
+  border-radius:20px;font-weight:600;letter-spacing:.5px}
+.badge.mat{background:rgba(249,115,22,.1);color:var(--primary)}
+.badge.upah{background:rgba(34,211,238,.1);color:var(--cyan)}
+.badge.alat{background:rgba(167,139,250,.1);color:var(--purple)}
+.currency{font-family:var(--fmono);font-size:12px;color:var(--success)}
+
+/* LOADING */
+.loader{display:flex;align-items:center;justify-content:center;padding:60px;gap:12px;color:var(--muted)}
+.spin{width:24px;height:24px;border:3px solid var(--border);border-top-color:var(--primary);
+  border-radius:50%;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* EMPTY */
+.empty{text-align:center;padding:60px;color:var(--muted);font-size:13px}
+.empty i{font-size:40px;margin-bottom:12px;display:block;opacity:.3}
+
+/* ── Overlay: hidden by default, never blocks desktop clicks ── */
+.overlay{
+  display:block;
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  z-index:98;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .3s;
+}
+.overlay.open{opacity:1;pointer-events:auto;}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .menu-btn{display:flex}
+  .chart-grid{grid-template-columns:1fr}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .content{padding:16px}
+  .topbar{padding:0 16px}
+}
+</style>
+</head>
+<body>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sb-top">
+    <div class="logo">
+      <div class="logo-ico"><i class="fas fa-hard-hat"></i></div>
+      <div><div class="logo-nm">QS MANAGER</div><div class="logo-sub">Construction System</div></div>
+    </div>
+  </div>
+  <nav class="sb-nav">
+    <div class="nav-section">Menu Utama</div>
+    <a href="dashboard.html"     class="nav-item active" id="nav-dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
+    <a href="material.html"      class="nav-item" id="nav-material"><i class="fas fa-boxes-stacked"></i> Material</a>
+    <a href="material.html#upah" class="nav-item" id="nav-upah"><i class="fas fa-people-carry-box"></i> Upah</a>
+    <a href="material.html#alat" class="nav-item" id="nav-alat"><i class="fas fa-wrench"></i> Alat</a>
+    <a href="ahsp.html"          class="nav-item" id="nav-ahsp"><i class="fas fa-calculator"></i> AHSP</a>
+    <a href="ahsp.html#rab"      class="nav-item" id="nav-rab"><i class="fas fa-file-invoice-dollar"></i> RAB</a>
+    <div class="nav-section">Sistem</div>
+    <a href="#" class="nav-item" onclick="refreshData();return false;"><i class="fas fa-rotate"></i> Refresh Data</a>
+    <a href="index.html" class="nav-item" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+  </nav>
+  <div class="sb-foot">
+    <div class="user-card">
+      <div class="user-av"><i class="fas fa-user"></i></div>
+      <div><div class="user-nm" id="userName">—</div><div class="user-role" id="userRole">—</div></div>
+      <button class="btn-logout" onclick="logout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+    <span class="page-title"><i class="fas fa-chart-pie" style="color:var(--primary);margin-right:8px"></i>Dashboard</span>
+    <div class="topbar-right">
+      <span class="time-badge" id="clock">—</span>
+      <button class="btn-refresh" onclick="refreshData()"><i class="fas fa-rotate"></i> Refresh</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- STATS -->
+    <div class="section-title"><i class="fas fa-layer-group"></i> Ringkasan Proyek</div>
+    <div class="stats-grid" id="statsGrid">
+      <div class="loader" style="grid-column:1/-1"><div class="spin"></div> Memuat data…</div>
+    </div>
+
+    <!-- CHARTS -->
+    <div class="section-title"><i class="fas fa-chart-bar"></i> Analisis Data</div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-head">
+          <span class="chart-title">TOP MATERIAL BY HARGA</span>
+          <span class="chart-badge">TOP 8</span>
+        </div>
+        <canvas id="chartMaterial"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-head">
+          <span class="chart-title">MATERIAL PER KATEGORI</span>
+          <span class="chart-badge">DISTRIBUSI</span>
+        </div>
+        <canvas id="chartCategory"></canvas>
+      </div>
+    </div>
+
+    <!-- RECENT TABLE -->
+    <div class="section-title"><i class="fas fa-clock-rotate-left"></i> Material Terbaru</div>
+    <div class="table-card">
+      <div class="table-head">
+        <span class="table-title">Entri Material Terkini</span>
+        <a href="material.html" style="font-size:12px;color:var(--primary);text-decoration:none">Lihat Semua →</a>
+      </div>
+      <div id="recentTable"><div class="loader"><div class="spin"></div> Memuat…</div></div>
+    </div>
+
+    <!-- RAB SUMMARY -->
+    <div class="section-title"><i class="fas fa-file-invoice-dollar"></i> Rekap RAB Proyek</div>
+    <div class="table-card">
+      <div class="table-head">
+        <span class="table-title">Rencana Anggaran Biaya</span>
+        <a href="ahsp.html#rab" style="font-size:12px;color:var(--primary);text-decoration:none">Kelola RAB →</a>
+      </div>
+      <div id="rabTable"><div class="loader"><div class="spin"></div> Memuat…</div></div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+const API_URL = 'YOUR_GAS_WEBAPP_URL';
+
+// ── SESSION ─────────────────────────────────────────────────
+function checkAuth() {
+  if (sessionStorage.getItem('loggedIn') !== '1') { location.href = 'index.html'; return null; }
+  return JSON.parse(sessionStorage.getItem('user') || '{}');
+}
+function logout() { sessionStorage.clear(); location.href = 'index.html'; }
+
+// ── CLOCK ───────────────────────────────────────────────────
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleDateString('id-ID',{weekday:'short',day:'2-digit',month:'short',year:'numeric'}) + ' ' +
+    now.toLocaleTimeString('id-ID');
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ── SIDEBAR TOGGLE ──────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+}
+
+// ── API ─────────────────────────────────────────────────────
+async function apiGet(action, params = {}) {
+  const qs = new URLSearchParams({ action, ...params }).toString();
+  const url = `${API_URL}?${qs}`;
+  const r = await fetch(url);
+  return r.json();
+}
+
+// ── FORMAT ──────────────────────────────────────────────────
+function rupiah(n) {
+  return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+}
+
+// ── DEMO DATA ───────────────────────────────────────────────
+function demoStats() {
+  return {
+    totalMaterial: 142, totalVendor: 23, totalPekerjaan: 18,
+    totalUpah: 35, totalAlat: 12, totalNilaiProyek: 4_850_000_000,
+    topMaterials: [
+      { nama: 'Besi Beton D16', harga: 18500, satuan: 'kg' },
+      { nama: 'Beton Ready Mix K-350', harga: 1250000, satuan: 'm³' },
+      { nama: 'Bekisting Plywood 18mm', harga: 320000, satuan: 'lbr' },
+      { nama: 'Cat Tembok Eksterior', harga: 215000, satuan: 'kg' },
+      { nama: 'Keramik 60×60', harga: 185000, satuan: 'm²' },
+      { nama: 'Semen Portland 50kg', harga: 78000, satuan: 'sak' },
+      { nama: 'Pasir Cor', harga: 325000, satuan: 'm³' },
+      { nama: 'Bata Ringan AAC', harga: 12500, satuan: 'bh' }
+    ],
+    byCategory: { 'Beton': 38, 'Besi & Baja': 22, 'Kayu': 18, 'Finishing': 31, 'Keramik': 15, 'Lainnya': 18 },
+    recent: [
+      { id:'MAT-0142', nama:'Besi Beton D16', kategori:'Besi & Baja', harga:18500, vendor:'PT Krakatau Steel', satuan:'kg', timestamp:'25/05/2025' },
+      { id:'MAT-0141', nama:'Beton K-350', kategori:'Beton', harga:1250000, vendor:'PT Holcim', satuan:'m³', timestamp:'24/05/2025' },
+      { id:'MAT-0140', nama:'Cat Eksterior', kategori:'Finishing', harga:215000, vendor:'CV Mitra Cat', satuan:'kg', timestamp:'23/05/2025' },
+      { id:'MAT-0139', nama:'Keramik 60×60', kategori:'Keramik', harga:185000, vendor:'PT Roman Tiles', satuan:'m²', timestamp:'22/05/2025' },
+      { id:'MAT-0138', nama:'Semen Portland', kategori:'Beton', harga:78000, vendor:'PT Tiga Roda', satuan:'sak', timestamp:'21/05/2025' }
+    ],
+    rabSummary: [
+      { id:'RAB-0001', nama:'Pekerjaan Pondasi', volume:120, satuan:'m³', total: 280_000_000 },
+      { id:'RAB-0002', nama:'Pekerjaan Struktur Lantai 1', volume:450, satuan:'m²', total: 890_000_000 },
+      { id:'RAB-0003', nama:'Pekerjaan Dinding & Plesteran', volume:680, satuan:'m²', total: 340_000_000 },
+      { id:'RAB-0004', nama:'Pekerjaan Atap', volume:320, satuan:'m²', total: 520_000_000 },
+      { id:'RAB-0005', nama:'Pekerjaan Finishing', volume:850, satuan:'m²', total: 680_000_000 }
+    ]
+  };
+}
+
+// ── RENDER STATS ────────────────────────────────────────────
+function renderStats(d) {
+  const cards = [
+    { label:'Total Material', val: d.totalMaterial, sub:'jenis material', icon:'fa-boxes-stacked', cls:'c-orange' },
+    { label:'Total Vendor', val: d.totalVendor, sub:'pemasok aktif', icon:'fa-store', cls:'c-cyan' },
+    { label:'Total Pekerjaan AHSP', val: d.totalPekerjaan, sub:'item AHSP tersimpan', icon:'fa-calculator', cls:'c-green' },
+    { label:'Total Upah', val: d.totalUpah, sub:'item upah tenaga', icon:'fa-people-carry-box', cls:'c-purple' },
+    { label:'Total Alat', val: d.totalAlat, sub:'item alat kerja', icon:'fa-wrench', cls:'c-yellow' },
+    { label:'Total Nilai Proyek', val: rupiah(d.totalNilaiProyek), sub:'dari RAB aktif', icon:'fa-coins', cls:'c-red' }
+  ];
+  document.getElementById('statsGrid').innerHTML = cards.map(c => `
+    <div class="stat-card ${c.cls}">
+      <div class="stat-label">${c.label}</div>
+      <div class="stat-val">${c.val}</div>
+      <div class="stat-sub">${c.sub}</div>
+      <i class="fas ${c.icon} stat-ico"></i>
+    </div>`).join('');
+}
+
+// ── CHARTS ──────────────────────────────────────────────────
+let chartMat, chartCat;
+Chart.defaults.color = '#64748B';
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.font.size = 11;
+
+function renderCharts(d) {
+  // Bar chart — top materials
+  if (chartMat) chartMat.destroy();
+  chartMat = new Chart(document.getElementById('chartMaterial'), {
+    type: 'bar',
+    data: {
+      labels: d.topMaterials.map(m => m.nama.length > 18 ? m.nama.slice(0,16)+'…' : m.nama),
+      datasets: [{ label: 'Harga', data: d.topMaterials.map(m => m.harga),
+        backgroundColor: 'rgba(249,115,22,.7)', borderColor: '#F97316',
+        borderWidth: 1, borderRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: ctx => 'Rp ' + ctx.raw.toLocaleString('id-ID') } } },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,.04)' }, ticks: { font: { size: 9 } } },
+        y: { grid: { color: 'rgba(255,255,255,.04)' },
+          ticks: { callback: v => 'Rp '+Number(v).toLocaleString('id-ID').slice(0,-3)+'K' } }
+      }
+    }
+  });
+
+  // Doughnut — categories
+  if (chartCat) chartCat.destroy();
+  const cats  = Object.keys(d.byCategory);
+  const vals  = cats.map(c => d.byCategory[c]);
+  const cols  = ['#F97316','#22D3EE','#22C55E','#A78BFA','#EAB308','#EF4444','#F472B6','#34D399'];
+  chartCat = new Chart(document.getElementById('chartCategory'), {
+    type: 'doughnut',
+    data: {
+      labels: cats,
+      datasets: [{ data: vals, backgroundColor: cols.slice(0, cats.length),
+        borderColor: '#161C27', borderWidth: 3 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 14 } },
+        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${ctx.raw} item` } } },
+      cutout: '62%'
+    }
+  });
+}
+
+// ── RECENT TABLE ─────────────────────────────────────────────
+function renderRecent(rows) {
+  if (!rows.length) {
+    document.getElementById('recentTable').innerHTML = '<div class="empty"><i class="fas fa-inbox"></i>Belum ada data material</div>';
+    return;
+  }
+  document.getElementById('recentTable').innerHTML = `
+    <table class="tbl">
+      <thead><tr>
+        <th>ID</th><th>Nama Material</th><th>Kategori</th><th>Vendor</th><th>Harga</th><th>Satuan</th>
+      </tr></thead>
+      <tbody>${rows.map(m => `
+        <tr>
+          <td class="mono">${m.id}</td>
+          <td>${m.nama}</td>
+          <td><span class="badge mat">${m.kategori||'—'}</span></td>
+          <td>${m.vendor||'—'}</td>
+          <td class="currency">${rupiah(m.harga)}</td>
+          <td class="mono">${m.satuan||'—'}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ── RAB TABLE ────────────────────────────────────────────────
+function renderRAB(rows) {
+  if (!rows || !rows.length) {
+    document.getElementById('rabTable').innerHTML = '<div class="empty"><i class="fas fa-file-circle-exclamation"></i>Belum ada data RAB</div>';
+    return;
+  }
+  const grand = rows.reduce((s,r) => s+(r.total||0), 0);
+  document.getElementById('rabTable').innerHTML = `
+    <table class="tbl">
+      <thead><tr><th>ID</th><th>Pekerjaan</th><th>Volume</th><th>Satuan</th><th>Total</th></tr></thead>
+      <tbody>
+        ${rows.map(r=>`
+          <tr>
+            <td class="mono">${r.id}</td>
+            <td>${r.nama||r.namaPekerjaan||'—'}</td>
+            <td class="mono">${(r.volume||0).toLocaleString('id-ID')}</td>
+            <td class="mono">${r.satuan||'—'}</td>
+            <td class="currency">${rupiah(r.total)}</td>
+          </tr>`).join('')}
+        <tr style="background:var(--card3)">
+          <td colspan="4" style="font-weight:600;color:var(--text);font-size:12px;letter-spacing:1px">GRAND TOTAL RAB</td>
+          <td class="currency" style="font-size:14px;font-weight:700;color:var(--primary)">${rupiah(grand)}</td>
+        </tr>
+      </tbody>
+    </table>`;
+}
+
+// ── LOAD DATA ────────────────────────────────────────────────
+async function loadDashboard() {
+  try {
+    let data;
+    if (API_URL === 'YOUR_GAS_WEBAPP_URL') {
+      data = demoStats();
+    } else {
+      const r = await apiGet('getDashboard');
+      data = r.success ? r.data : demoStats();
+    }
+    renderStats(data);
+    renderCharts(data);
+    renderRecent(data.recent || []);
+    renderRAB(data.rabSummary || []);
+  } catch (e) {
+    const d = demoStats();
+    renderStats(d);
+    renderCharts(d);
+    renderRecent(d.recent);
+    renderRAB(d.rabSummary);
+  }
+}
+
+function refreshData() {
+  document.getElementById('statsGrid').innerHTML = '<div class="loader" style="grid-column:1/-1"><div class="spin"></div> Memuat ulang…</div>';
+  loadDashboard();
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+const user = checkAuth();
+if (user) {
+  document.getElementById('userName').textContent = user.username || '—';
+  document.getElementById('userRole').textContent = user.role || '—';
+}
+loadDashboard();
+</script>
+</body>
+</html>
