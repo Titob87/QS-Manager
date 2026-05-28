@@ -360,7 +360,7 @@ button{font-family:var(--fbody)}
    ============================================================ */
 
 // ── CONFIG ───────────────────────────────────────────────────
-const API_URL = 'https://script.google.com/macros/s/AKfycbwwxSHe-Ng1KZKLXMJ4qL84V7RfMrNa1OkcGJpEFnXCpQ0a0_-s-ihhDu4yxG9HrNoB/exec';
+const API_URL = 'YOUR_GAS_WEBAPP_URL';
 
 // ── RBAC ─────────────────────────────────────────────────────
 const ROLE_PERMS = {
@@ -928,21 +928,147 @@ function deleteAHSP(id,nama){
   });
 }
 
-// ── EXPORT FUNCTIONS ─────────────────────────────────────────────
+// ── EXPORT FUNCTIONS (Format Permen PUPR No.8/2023) ──────────────
 
-// Build tabular rows from one AHSP item
-function buildAHSPRows(a){
-  const hdrs=['Kode','Nama Pekerjaan','Jenis','Item','Koefisien','Satuan','Harga Satuan','Jumlah'];
-  const rows=a.items.map(it=>[a.id,a.namaPekerjaan,it.jenis,it.item,it.koefisien,it.satuan||'',it.hargaSatuan,it.jumlah]);
-  // Summary rows
-  rows.push(['','','','','','','Subtotal AHSP',a.totalAHSP]);
-  rows.push(['','','','','','',`Overhead (${a.overhead||0}%)`,a.totalAHSP*(a.overhead||0)/100]);
-  rows.push(['','','','','','',`Contractor Fee (${a.contractorFee||0}%)`,''+(a.grandTotal)]);
-  rows.push(['','','','','','','GRAND TOTAL',a.grandTotal]);
-  return{hdrs,rows};
+/**
+ * Build worksheet data array + merges + styles for ONE AHSP item
+ * Format sesuai tabel AHSP SNI/PUPR:
+ * Cols: No | Uraian | Kode | Satuan | Koefisien | Harga Satuan (Rp) | Jumlah Harga (Rp)
+ */
+function buildAHSPWorksheet(a) {
+  // ── helpers ─────────────────────────────────────────────────────
+  const rp = n => Number(n || 0);           // raw number for Excel
+  const pct = n => parseFloat(n || 0);
+
+  // ── group items by category ──────────────────────────────────────
+  const tenagaKerja = a.items.filter(x => x.jenis === 'upah');
+  const bahan       = a.items.filter(x => x.jenis === 'material');
+  const peralatan   = a.items.filter(x => x.jenis === 'alat');
+
+  // ── compute subtotals ───────────────────────────────────────────
+  const sumTK  = tenagaKerja.reduce((s, x) => s + (parseFloat(x.koefisien) || 0) * (parseFloat(x.hargaSatuan) || 0), 0);
+  const sumBhn = bahan.reduce((s, x)       => s + (parseFloat(x.koefisien) || 0) * (parseFloat(x.hargaSatuan) || 0), 0);
+  const sumAlat= peralatan.reduce((s, x)   => s + (parseFloat(x.koefisien) || 0) * (parseFloat(x.hargaSatuan) || 0), 0);
+  const subtotal = sumTK + sumBhn + sumAlat;
+
+  const ovPct  = pct(a.overhead);
+  const feePct = pct(a.contractorFee);
+  const pphPct = pct(a.pph);
+  const bukPct = ovPct + feePct + pphPct;   // total BUK %
+  const ovAmt  = subtotal * (ovPct  / 100);
+  const feeAmt = (subtotal + ovAmt) * (feePct / 100);
+  const base   = subtotal + ovAmt + feeAmt;
+  const pphAmt = base * (pphPct / 100);
+  const grandTotal = base + pphAmt;
+
+  // ── column index helpers (0-based) ──────────────────────────────
+  // A=0:No  B=1:Uraian  C=2:Kode  D=3:Satuan  E=4:Koefisien  F=5:HargaSatuan  G=6:JumlahHarga
+  const NCOLS = 7;
+
+  // ── accumulate AOA rows + merge list ───────────────────────────
+  const aoa    = [];  // array of arrays
+  const merges = [];  // {s:{r,c}, e:{r,c}}
+  const widths = [6, 38, 10, 9, 12, 18, 18]; // col widths chars
+
+  let r = 0; // current row index (0-based)
+
+  // ── ROW 0: TITLE (merged A-G) ──────────────────────────────────
+  aoa.push([a.namaPekerjaan, '', '', '', '', '', '']);
+  merges.push({ s: { r, c: 0 }, e: { r, c: NCOLS - 1 } });
+  r++;
+
+  // ── ROW 1: KODE AHSP (merged) ──────────────────────────────────
+  aoa.push([`Kode: ${a.id}`, '', '', '', '', '', '']);
+  merges.push({ s: { r, c: 0 }, e: { r, c: NCOLS - 1 } });
+  r++;
+
+  // ── ROW 2: blank spacer ────────────────────────────────────────
+  aoa.push(['', '', '', '', '', '', '']);
+  r++;
+
+  // ── ROW 3: COLUMN HEADERS ──────────────────────────────────────
+  aoa.push(['No', 'Uraian', 'Kode', 'Satuan', 'Koefisien', 'Harga Satuan\n(Rp)', 'Jumlah\nHarga (Rp)']);
+  r++;
+
+  // ── Helper: append a section ────────────────────────────────────
+  function addSection(letter, label, items, sumLabel, sumVal) {
+    // Section header row  e.g.  A | Tenaga Kerja
+    aoa.push([letter, label, '', '', '', '', '']);
+    merges.push({ s: { r, c: 1 }, e: { r, c: NCOLS - 1 } });
+    r++;
+
+    // Item rows
+    items.forEach(it => {
+      const koe    = parseFloat(it.koefisien)   || 0;
+      const harga  = parseFloat(it.hargaSatuan) || 0;
+      const jumlah = koe * harga;
+      // Kode: use itemId if available (e.g. UPH-0001 → L.01 style), else blank
+      const kode = it.kode || '';
+      aoa.push(['', it.item, kode, it.satuan || '', koe, rp(harga), rp(jumlah)]);
+      r++;
+    });
+
+    // If section is empty, add one blank item row
+    if (!items.length) {
+      aoa.push(['', '', '', '', '', '', '']);
+      r++;
+    }
+
+    // Subtotal row  (label spans B-F, value in G)
+    aoa.push(['', sumLabel, '', '', '', '', rp(sumVal)]);
+    merges.push({ s: { r, c: 1 }, e: { r, c: 5 } });
+    r++;
+  }
+
+  addSection('A', 'Tenaga Kerja', tenagaKerja, 'Jumlah Harga Tenaga Kerja', sumTK);
+  addSection('B', 'Bahan',        bahan,        'Jumlah Harga Bahan',        sumBhn);
+  addSection('C', 'Peralatan',    peralatan,    'Jumlah Harga Alat',         sumAlat);
+
+  // ── ROW D: Total A+B+C ─────────────────────────────────────────
+  aoa.push(['D', 'Jumlah Harga Tenaga Kerja, Bahan dan Peralatan (A+B+C)', '', '', '', '', rp(subtotal)]);
+  merges.push({ s: { r, c: 1 }, e: { r, c: 5 } });
+  r++;
+
+  // ── ROW E: BUK ────────────────────────────────────────────────
+  const bukLabel = `Biaya Umum dan Keuntungan (${ovPct + feePct}%) + PPH (${pphPct}%) × D`;
+  const bukValStr = `${bukPct.toFixed(2)}% × D`;
+  aoa.push(['E', bukLabel, '', '', '', bukValStr, rp(grandTotal - subtotal)]);
+  merges.push({ s: { r, c: 1 }, e: { r, c: 4 } });
+  r++;
+
+  // ── ROW F: Harga Satuan Pekerjaan ──────────────────────────────
+  aoa.push(['F', 'Harga Satuan Pekerjaan (D+E)', '', '', '', '', rp(grandTotal)]);
+  merges.push({ s: { r, c: 1 }, e: { r, c: 5 } });
+  r++;
+
+  // ── BUILD WORKSHEET ────────────────────────────────────────────
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws['!merges'] = merges;
+  ws['!cols']   = widths.map(w => ({ wch: w }));
+
+  // ── APPLY CELL STYLES using xlsx-style compatible approach ──────
+  // SheetJS community doesn't support styles natively — we encode via
+  // the sheet's !rows for row heights and use cell .z (format) for numbers
+  ws['!rows'] = [];
+  // Row 0 (title): taller
+  ws['!rows'][0] = { hpx: 36 };
+  ws['!rows'][3] = { hpx: 32 }; // column headers
+
+  // Set number format for all currency cells (col F & G, data rows)
+  aoa.forEach((row, ri) => {
+    row.forEach((val, ci) => {
+      if (typeof val === 'number') {
+        const addr = XLSX.utils.encode_cell({ r: ri, c: ci });
+        if (!ws[addr]) ws[addr] = { t: 'n', v: val };
+        ws[addr].z = '#,##0'; // thousands separator, no decimal
+      }
+    });
+  });
+
+  return ws;
 }
 
-// Export selected AHSP to .xlsx
+// ── Export selected AHSP to .xlsx ──────────────────────────────────
 function exportSelectedExcel(){
   const ids=[...selectedAHSP];
   if(!ids.length){toast('Pilih minimal 1 AHSP dulu!','warning');return;}
@@ -952,40 +1078,78 @@ function exportSingleExcel(id){exportAHSPToExcel([ahspList.find(a=>a.id===id)].f
 
 function exportAHSPToExcel(items){
   if(!items.length)return;
-  const wb=XLSX.utils.book_new();
-  items.forEach(a=>{
-    const {hdrs,rows}=buildAHSPRows(a);
-    const ws=XLSX.utils.aoa_to_sheet([hdrs,...rows]);
-    // Column widths
-    ws['!cols']=[{wch:12},{wch:38},{wch:10},{wch:28},{wch:12},{wch:8},{wch:16},{wch:18}];
-    const sheetName=a.id.replace(/[^a-zA-Z0-9-]/g,'').slice(0,31);
-    XLSX.utils.book_append_sheet(wb,ws,sheetName);
+  const wb = XLSX.utils.book_new();
+  items.forEach(a => {
+    const ws = buildAHSPWorksheet(a);
+    // Sheet name max 31 chars, no special chars
+    const sheetName = (a.namaPekerjaan || a.id).replace(/[^a-zA-Z0-9 \-]/g,'').trim().slice(0, 31) || a.id.slice(0,31);
+    XLSX.utils.book_append_sheet(wb, ws, sheetName);
   });
-  XLSX.writeFile(wb,'AHSP_Export_'+new Date().toISOString().slice(0,10)+'.xlsx');
-  toast('Excel berhasil diekspor!');
+  const fname = 'AHSP_' + new Date().toISOString().slice(0,10) + '.xlsx';
+  XLSX.writeFile(wb, fname);
+  toast(`Excel "${fname}" berhasil diekspor!`);
 }
 
-// Copy TSV to clipboard (pastes cleanly into Google Sheets / Excel)
+// ── Copy TSV (PUPR format, paste-ready for Google Sheets / Excel) ──
+function buildAHSPTSV(a) {
+  const pct = n => parseFloat(n || 0);
+  const tenagaKerja = a.items.filter(x => x.jenis === 'upah');
+  const bahan       = a.items.filter(x => x.jenis === 'material');
+  const peralatan   = a.items.filter(x => x.jenis === 'alat');
+
+  const sumTK   = tenagaKerja.reduce((s,x) => s + (parseFloat(x.koefisien)||0)*(parseFloat(x.hargaSatuan)||0), 0);
+  const sumBhn  = bahan.reduce((s,x)       => s + (parseFloat(x.koefisien)||0)*(parseFloat(x.hargaSatuan)||0), 0);
+  const sumAlat = peralatan.reduce((s,x)   => s + (parseFloat(x.koefisien)||0)*(parseFloat(x.hargaSatuan)||0), 0);
+  const subtotal = sumTK + sumBhn + sumAlat;
+  const ovPct=pct(a.overhead), feePct=pct(a.contractorFee), pphPct=pct(a.pph);
+  const ovAmt=(subtotal*(ovPct/100)), feeAmt=((subtotal+ovAmt)*(feePct/100));
+  const base=subtotal+ovAmt+feeAmt, pphAmt=base*(pphPct/100), grand=base+pphAmt;
+
+  const TAB = '\t';
+  const row = (...cells) => cells.join(TAB);
+  const lines = [];
+
+  lines.push(a.namaPekerjaan);
+  lines.push(`Kode: ${a.id}`);
+  lines.push('');
+  lines.push(row('No','Uraian','Kode','Satuan','Koefisien','Harga Satuan (Rp)','Jumlah Harga (Rp)'));
+
+  const addSec = (letter, label, items, sumLabel, sumVal) => {
+    lines.push(row(letter, label));
+    items.forEach(it => {
+      const koe=parseFloat(it.koefisien)||0, h=parseFloat(it.hargaSatuan)||0;
+      lines.push(row('', it.item, it.kode||'', it.satuan||'', koe, h, koe*h));
+    });
+    if(!items.length) lines.push(row('','','','','','',''));
+    lines.push(row('', sumLabel, '', '', '', '', sumVal));
+  };
+
+  addSec('A','Tenaga Kerja',  tenagaKerja, 'Jumlah Harga Tenaga Kerja', sumTK);
+  addSec('B','Bahan',         bahan,        'Jumlah Harga Bahan',        sumBhn);
+  addSec('C','Peralatan',     peralatan,    'Jumlah Harga Alat',         sumAlat);
+
+  lines.push(row('D','Jumlah Harga Tenaga Kerja, Bahan dan Peralatan (A+B+C)','','','','',subtotal));
+  lines.push(row('E',`Biaya Umum dan Keuntungan (${ovPct+feePct}%) + PPH (${pphPct}%) × D`,'','','',`${(ovPct+feePct+pphPct).toFixed(2)}% × D`,grand-subtotal));
+  lines.push(row('F','Harga Satuan Pekerjaan (D+E)','','','','',grand));
+
+  return lines.join('\n');
+}
+
 function copySelectedTSV(){
   const ids=[...selectedAHSP];
   if(!ids.length){toast('Pilih minimal 1 AHSP dulu!','warning');return;}
-  copySingleTSV(null,ahspList.filter(a=>ids.includes(a.id)));
+  const text = ahspList.filter(a=>ids.includes(a.id)).map(buildAHSPTSV).join('\n\n');
+  navigator.clipboard.writeText(text)
+    .then(()=>toast('TSV PUPR-format disalin! Paste ke Google Sheets / Excel — langsung rapi.'))
+    .catch(()=>toast('Gagal menyalin — browser perlu HTTPS / izin clipboard','error'));
 }
 function copySingleTSV(id,items){
-  const data=items||[ahspList.find(a=>a.id===id)].filter(Boolean);
+  const data = items || [ahspList.find(a=>a.id===id)].filter(Boolean);
   if(!data.length)return;
-  const lines=['Kode\tNama Pekerjaan\tJenis\tItem\tKoefisien\tSatuan\tHarga Satuan\tJumlah'];
-  data.forEach(a=>{
-    a.items.forEach(it=>{
-      lines.push([a.id,a.namaPekerjaan,it.jenis,it.item,it.koefisien,it.satuan||'',it.hargaSatuan,it.jumlah].join('\t'));
-    });
-    lines.push(['','','','','','','Subtotal AHSP',a.totalAHSP].join('\t'));
-    lines.push(['','','','','','','GRAND TOTAL',a.grandTotal].join('\t'));
-    lines.push('');
-  });
-  navigator.clipboard.writeText(lines.join('\n'))
-    .then(()=>toast('TSV disalin ke clipboard! Paste ke Google Sheets / Excel.'))
-    .catch(()=>toast('Gagal menyalin — browser tidak mendukung clipboard API','error'));
+  const text = data.map(buildAHSPTSV).join('\n\n');
+  navigator.clipboard.writeText(text)
+    .then(()=>toast('TSV PUPR-format disalin! Paste ke Google Sheets / Excel — langsung rapi.'))
+    .catch(()=>toast('Gagal menyalin — browser perlu HTTPS / izin clipboard','error'));
 }
 
 // ── INIT ──────────────────────────────────────────────────────
