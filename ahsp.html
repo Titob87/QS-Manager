@@ -1,572 +1,591 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QS Manager — AHSP & RAB</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>QS Manager — AHSP Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
+/* ============================================================
+   QS Manager — Shared CSS Design System v3.0
+   ============================================================ */
 :root{
-  --bg:#090C12;--surface:#0F1219;--card:#161C27;--card2:#1C2333;--card3:#212B3C;
-  --primary:#F97316;--primary-d:rgba(249,115,22,.12);--primary-b:rgba(249,115,22,.25);
+  --bg:#090C12;--surface:#0E1118;--card:#141B26;--card2:#1A2133;--card3:#1F2840;
+  --primary:#F97316;--primary-d:rgba(249,115,22,.1);--primary-b:rgba(249,115,22,.22);
   --cyan:#22D3EE;--success:#22C55E;--warning:#EAB308;--danger:#EF4444;--purple:#A78BFA;
-  --text:#E2E8F0;--muted:#64748B;--dim:#94A3B8;--border:#1E2940;--border2:#253044;
-  --sidebar-w:260px;--fdisp:'Barlow Condensed',sans-serif;
-  --fbody:'DM Sans',sans-serif;--fmono:'JetBrains Mono',monospace
+  --text:#DDE4EF;--muted:#526070;--dim:#8899AA;--border:#1C2535;--border2:#243049;
+  --sidebar-w:240px;
+  --fdisp:'Barlow Condensed',sans-serif;--fbody:'DM Sans',sans-serif;--fmono:'JetBrains Mono',monospace;
+  --r-sm:6px;--r-md:10px;--r-lg:13px;--r-xl:16px
 }
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:var(--fbody);background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+html{scroll-behavior:smooth}
+body{font-family:var(--fbody);background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:13.5px}
 a{text-decoration:none;color:inherit}
+button{font-family:var(--fbody)}
 
-/* ── SIDEBAR ── */
-.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);
-  display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s}
-.sb-top{padding:24px 20px;border-bottom:1px solid var(--border)}
-.logo{display:flex;align-items:center;gap:12px}
-.logo-ico{width:42px;height:42px;background:var(--primary);border-radius:12px;
-  display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;
-  box-shadow:0 6px 18px rgba(249,115,22,.35);flex-shrink:0}
-.logo-nm{font-family:var(--fdisp);font-size:18px;font-weight:800;letter-spacing:1.5px}
-.logo-sub{font-size:9px;color:var(--muted);letter-spacing:2.5px;text-transform:uppercase}
-.sb-nav{flex:1;padding:16px 12px;overflow-y:auto}
-.nav-section{font-size:9px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:16px 8px 8px;font-weight:600}
-.nav-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;
-  color:var(--dim);font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;text-decoration:none;margin-bottom:2px}
-.nav-item:hover{background:var(--primary-d);color:var(--text)}
-.nav-item.active{background:var(--primary-d);color:var(--primary);border-left:3px solid var(--primary);padding-left:9px}
-.nav-item i{width:18px;text-align:center;font-size:14px;flex-shrink:0}
-.sb-foot{padding:16px 12px;border-top:1px solid var(--border)}
-.user-card{display:flex;align-items:center;gap:10px;padding:10px;background:var(--card2);border-radius:10px}
-.user-av{width:36px;height:36px;background:var(--primary-d);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:15px;flex-shrink:0}
-.user-nm{font-size:13px;font-weight:600}.user-role{font-size:10px;color:var(--muted);text-transform:capitalize}
-.btn-logout{margin-left:auto;color:var(--muted);cursor:pointer;font-size:14px;background:none;border:none;padding:4px;transition:color .2s}
+/* ── SIDEBAR ─────────────────────────────────────────────── */
+.sidebar{width:var(--sidebar-w);background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;transition:transform .3s}
+.sb-top{padding:16px 14px;border-bottom:1px solid var(--border)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-ico{width:36px;height:36px;background:var(--primary);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;color:#fff;box-shadow:0 4px 14px rgba(249,115,22,.35);flex-shrink:0}
+.logo-nm{font-family:var(--fdisp);font-size:15px;font-weight:800;letter-spacing:1.5px}
+.logo-sub{font-size:8.5px;color:var(--muted);letter-spacing:2px;text-transform:uppercase}
+.sb-nav{flex:1;padding:10px 8px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.nav-section{font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:13px 10px 5px;font-weight:700}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r-md);color:var(--dim);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;text-decoration:none;margin-bottom:1px;border-left:2px solid transparent}
+.nav-item:hover{background:var(--primary-d);color:var(--text);border-left-color:rgba(249,115,22,.3)}
+.nav-item.active{background:var(--primary-d);color:var(--primary);border-left-color:var(--primary)}
+.nav-item i{width:14px;text-align:center;font-size:12px;flex-shrink:0}
+.sb-foot{padding:10px 8px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:8px;padding:8px;background:var(--card2);border-radius:var(--r-md)}
+.user-av{width:30px;height:30px;background:var(--primary-d);border-radius:7px;display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:12px;flex-shrink:0}
+.user-nm{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px}
+.btn-logout{margin-left:auto;color:var(--muted);cursor:pointer;font-size:12px;background:none;border:none;padding:4px;transition:color .2s}
 .btn-logout:hover{color:var(--danger)}
 
-/* ── MAIN ── */
-.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh}
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:60px;
-  display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:90}
-.menu-btn{display:none;background:none;border:none;color:var(--dim);font-size:18px;cursor:pointer;padding:8px}
-.page-title{font-family:var(--fdisp);font-size:20px;font-weight:700;letter-spacing:.5px}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.content{padding:28px;flex:1}
+/* ── MAIN ─────────────────────────────────────────────────── */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;min-width:0}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;height:52px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:90}
+.menu-btn{display:none;background:none;border:none;color:var(--dim);font-size:16px;cursor:pointer;padding:6px}
+.page-title{font-family:var(--fdisp);font-size:17px;font-weight:700;letter-spacing:.5px;display:flex;align-items:center;gap:8px}
+.page-title i{color:var(--primary);font-size:15px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+.content{padding:22px;flex:1}
 
-/* ── TABS ── */
-.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);
-  border-radius:12px;padding:4px;width:fit-content;margin-bottom:24px}
-.tab{padding:9px 22px;border-radius:9px;font-size:12px;font-weight:600;letter-spacing:.5px;
-  cursor:pointer;transition:all .2s;color:var(--muted);display:flex;align-items:center;gap:8px}
-.tab:hover{color:var(--text)}
-.tab.active{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(249,115,22,.3)}
+/* ── OVERLAY ─────────────────────────────────────────────── */
+.overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:98;opacity:0;pointer-events:none;transition:opacity .28s}
+.overlay.open{opacity:1;pointer-events:auto}
 
-/* ── PANELS ── */
-.panel{display:none}.panel.active{display:block}
-
-/* ── AHSP BUILDER ── */
-.ahsp-wrap{display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start}
-
-/* FORM CARD */
-.form-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px}
-.fc-title{font-family:var(--fdisp);font-size:17px;font-weight:700;letter-spacing:.5px;margin-bottom:20px;
-  display:flex;align-items:center;gap:8px}
-.fc-title i{color:var(--primary)}
-.fgroup{margin-bottom:16px}
-.flabel{display:block;font-size:10px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
-.flabel span{color:var(--danger)}
-.finput,.fsel{width:100%;padding:11px 14px;background:var(--card2);border:1px solid var(--border);
-  border-radius:9px;color:var(--text);font-family:var(--fbody);font-size:13px;outline:none;transition:all .2s}
-.finput:focus,.fsel:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-d)}
-.finput::placeholder{color:var(--muted)}
-.fsel{cursor:pointer;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2364748B' viewBox='0 0 16 16'%3E%3Cpath d='M8 10L3 5h10z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;background-size:12px;padding-right:36px}
-.fsel option{background:var(--card2)}
-.frow{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-
-/* ITEM ROWS inside AHSP form */
-.item-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
-.item-row{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;position:relative}
-.item-row-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-.item-jenis-badge{font-size:10px;font-weight:700;letter-spacing:1px;padding:3px 10px;border-radius:20px}
-.jenis-mat{background:rgba(249,115,22,.12);color:var(--primary)}
-.jenis-upah{background:rgba(34,211,238,.12);color:var(--cyan)}
-.jenis-alat{background:rgba(167,139,250,.12);color:var(--purple)}
-.item-del{width:26px;height:26px;border-radius:7px;border:none;background:rgba(239,68,68,.1);
-  color:var(--danger);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.item-del:hover{background:var(--danger);color:#fff}
-.item-calc{display:flex;align-items:center;gap:8px;margin-top:10px;font-family:var(--fmono);font-size:11px;color:var(--muted)}
-.item-calc .eq{color:var(--dim)}.item-calc .result{color:var(--success);font-weight:600}
-
-.add-item-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
-.btn-add-item{display:flex;align-items:center;gap:7px;padding:8px 14px;border-radius:8px;
-  font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;border:1px solid}
-.btn-add-item.mat{background:var(--primary-d);border-color:var(--primary-b);color:var(--primary)}
-.btn-add-item.mat:hover{background:var(--primary);color:#fff}
-.btn-add-item.upah{background:rgba(34,211,238,.08);border-color:rgba(34,211,238,.2);color:var(--cyan)}
-.btn-add-item.upah:hover{background:var(--cyan);color:#000}
-.btn-add-item.alat{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.2);color:var(--purple)}
-.btn-add-item.alat:hover{background:var(--purple);color:#fff}
-
-/* AHSP TOTAL PREVIEW */
-.total-preview{background:var(--card2);border:1px solid var(--border);border-radius:10px;
-  padding:16px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
-.tp-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
-.tp-val{font-family:var(--fmono);font-size:22px;font-weight:600;color:var(--primary)}
-
-.btn-primary{width:100%;padding:13px;background:var(--primary);color:#fff;border:none;border-radius:9px;
-  font-family:var(--fdisp);font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;
-  transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
-.btn-primary:hover{background:#ea6d10;box-shadow:0 6px 20px rgba(249,115,22,.3)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed}
-
-/* AHSP LIST SIDE */
-.ahsp-list-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:sticky;top:80px}
-.alc-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
-.alc-title{font-family:var(--fdisp);font-size:16px;font-weight:700;letter-spacing:.5px}
-.alc-count{font-family:var(--fmono);font-size:11px;color:var(--muted);background:var(--card2);padding:3px 9px;border-radius:20px}
-.search-wrap{padding:12px 16px;border-bottom:1px solid var(--border)}
-.search-inp{width:100%;padding:8px 12px 8px 34px;background:var(--card2);border:1px solid var(--border);
-  border-radius:8px;color:var(--text);font-size:12px;outline:none;transition:border-color .2s;position:relative}
-.search-inp:focus{border-color:var(--primary)}
-.search-inp::placeholder{color:var(--muted)}
-.sw{position:relative}.sw i{position:absolute;left:24px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px}
-.ahsp-items{max-height:600px;overflow-y:auto}
-.ahsp-item-card{padding:16px 20px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
-.ahsp-item-card:hover{background:rgba(255,255,255,.02)}
-.aic-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.aic-id{font-family:var(--fmono);font-size:10px;color:var(--muted)}
-.aic-nama{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px}
-.aic-total{font-family:var(--fmono);font-size:13px;color:var(--success)}
-.aic-meta{display:flex;gap:8px;flex-wrap:wrap}
-.aic-badge{font-size:9px;padding:2px 7px;border-radius:20px;background:var(--card2);color:var(--dim)}
-.aic-del{width:26px;height:26px;border-radius:7px;border:none;background:rgba(239,68,68,.1);
-  color:var(--danger);cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;transition:all .2s}
-.aic-del:hover{background:var(--danger);color:#fff}
-.empty-list{padding:40px;text-align:center;color:var(--muted)}
-.empty-list i{font-size:32px;display:block;margin-bottom:10px;opacity:.2}
-.empty-list p{font-size:12px}
-
-/* ── RAB PANEL ── */
-.rab-wrap{display:grid;grid-template-columns:360px 1fr;gap:20px;align-items:start}
-.section-title{font-family:var(--fdisp);font-size:20px;font-weight:700;letter-spacing:.5px;
-  margin-bottom:20px;display:flex;align-items:center;gap:10px}
+/* ── SECTION TITLE ────────────────────────────────────────── */
+.section-title{font-family:var(--fdisp);font-size:17px;font-weight:700;letter-spacing:.5px;margin-bottom:14px;display:flex;align-items:center;gap:9px;color:var(--text)}
 .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.section-title i{color:var(--primary);font-size:14px}
 
-/* RAB TABLE */
-.data-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
-.data-toolbar{padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
-.tbl-wrap{overflow-x:auto}
-.tbl{width:100%;border-collapse:collapse;min-width:550px}
-.tbl th{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);
-  padding:11px 16px;text-align:left;background:var(--card2);font-weight:700}
-.tbl td{padding:12px 16px;font-size:12px;border-top:1px solid var(--border);color:var(--dim);vertical-align:middle}
+/* ── STAT CARDS ───────────────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:22px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;cursor:default}
+.stat-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.c-orange::before{background:var(--primary)}.c-cyan::before{background:var(--cyan)}
+.c-green::before{background:var(--success)}.c-purple::before{background:var(--purple)}
+.c-yellow::before{background:var(--warning)}.c-red::before{background:var(--danger)}
+.stat-label{font-size:9.5px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;font-weight:700}
+.stat-val{font-family:var(--fmono);font-size:26px;font-weight:500;line-height:1;margin-bottom:3px}
+.stat-sub{font-size:10.5px;color:var(--muted)}
+.stat-ico{position:absolute;top:14px;right:14px;font-size:24px;opacity:.06}
+
+/* ── TABS ─────────────────────────────────────────────────── */
+.tabs{display:flex;gap:3px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:3px;width:fit-content;margin-bottom:20px;flex-wrap:wrap}
+.tab{padding:7px 18px;border-radius:var(--r-md);font-size:11.5px;font-weight:600;letter-spacing:.3px;cursor:pointer;transition:all .18s;color:var(--muted);display:flex;align-items:center;gap:7px;white-space:nowrap}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(249,115,22,.28)}
+.panel{display:none}.panel.active{display:block}
+.panel-grid{display:grid;grid-template-columns:320px 1fr;gap:18px;align-items:start}
+
+/* ── FORM CARDS ───────────────────────────────────────────── */
+.form-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px}
+.fc-title{font-family:var(--fdisp);font-size:15px;font-weight:700;letter-spacing:.5px;margin-bottom:16px;display:flex;align-items:center;gap:7px}
+.fc-title i{color:var(--primary);font-size:13px}
+.fgroup{margin-bottom:13px}
+.flabel{display:block;font-size:9.5px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.flabel .req{color:var(--danger)}
+.finput,.fsel,.ftarea{width:100%;padding:9px 12px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r-md);color:var(--text);font-family:var(--fbody);font-size:13px;outline:none;transition:border-color .18s,box-shadow .18s}
+.finput:focus,.fsel:focus,.ftarea:focus{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-d)}
+.finput::placeholder,.ftarea::placeholder{color:var(--muted)}
+.fsel{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2364748B' viewBox='0 0 16 16'%3E%3Cpath d='M8 10L3 5h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:11px;padding-right:30px}
+.fsel option{background:var(--card2)}
+.ftarea{resize:vertical;min-height:70px}
+.frow-2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.frow-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+
+/* ── BUTTONS ──────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:8px 16px;border-radius:var(--r-md);font-family:var(--fbody);font-size:12.5px;font-weight:600;cursor:pointer;transition:all .18s;border:none;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:#ea6d10;box-shadow:0 4px 14px rgba(249,115,22,.3)}
+.btn-secondary{background:var(--card2);color:var(--dim);border:1px solid var(--border)}.btn-secondary:hover{border-color:var(--border2);color:var(--text)}
+.btn-danger{background:rgba(239,68,68,.1);color:var(--danger);border:1px solid rgba(239,68,68,.18)}.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-success{background:rgba(34,197,94,.1);color:var(--success);border:1px solid rgba(34,197,94,.18)}.btn-success:hover{background:var(--success);color:#fff}
+.btn-cyan{background:rgba(34,211,238,.1);color:var(--cyan);border:1px solid rgba(34,211,238,.18)}.btn-cyan:hover{background:var(--cyan);color:#000}
+.btn-sm{padding:5px 11px;font-size:11px}
+.btn-full{width:100%;padding:10px}
+.btn:disabled{opacity:.45;cursor:not-allowed;transform:none!important}
+
+/* ── DATA TABLE CARD ──────────────────────────────────────── */
+.data-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.data-toolbar{padding:12px 16px;display:flex;align-items:center;gap:9px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.search-box{position:relative;flex:1;min-width:180px}
+.search-box i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px}
+.search-box input{width:100%;padding:7px 10px 7px 30px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r-md);color:var(--text);font-size:12.5px;outline:none;transition:border-color .18s}
+.search-box input:focus{border-color:var(--primary)}
+.search-box input::placeholder{color:var(--muted)}
+.filter-sel{padding:7px 26px 7px 10px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r-md);color:var(--dim);font-size:12px;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%2364748B' viewBox='0 0 16 16'%3E%3Cpath d='M8 10L3 5h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;background-size:10px}
+.filter-sel option{background:var(--card2)}
+.count-tag{font-family:var(--fmono);font-size:10.5px;color:var(--muted);background:var(--card2);padding:3px 9px;border-radius:20px;white-space:nowrap}
+.tbl-wrap{overflow-x:auto;max-height:520px;overflow-y:auto}
+.tbl{width:100%;border-collapse:collapse;min-width:500px}
+.tbl thead{position:sticky;top:0;z-index:2}
+.tbl th{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:9px 14px;text-align:left;background:var(--card2);font-weight:700;white-space:nowrap;cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
+.tbl th:hover{color:var(--text)}
+.tbl th .sort-ico{margin-left:4px;opacity:.35}
+.tbl td{padding:9.5px 14px;font-size:12px;border-top:1px solid var(--border);color:var(--dim);vertical-align:middle}
 .tbl tr:hover td{background:rgba(255,255,255,.015);color:var(--text)}
+.act-btns{display:flex;gap:5px;justify-content:flex-end}
+.act-btn{width:26px;height:26px;border-radius:6px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .18s}
+.act-edit{background:rgba(34,211,238,.08);color:var(--cyan)}.act-edit:hover{background:var(--cyan);color:#000}
+.act-del{background:rgba(239,68,68,.08);color:var(--danger)}.act-del:hover{background:var(--danger);color:#fff}
+.act-view{background:rgba(249,115,22,.08);color:var(--primary)}.act-view:hover{background:var(--primary);color:#fff}
+
+/* ── PAGINATION ───────────────────────────────────────────── */
+.pagination{padding:10px 16px;display:flex;align-items:center;gap:6px;border-top:1px solid var(--border)}
+.pg-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--card2);color:var(--muted);font-size:11.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .18s}
+.pg-btn:hover:not(:disabled){border-color:var(--primary);color:var(--primary)}
+.pg-btn.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.pg-btn:disabled{opacity:.28;cursor:not-allowed}
+.pg-info{font-size:10.5px;color:var(--muted);margin-left:auto;font-family:var(--fmono)}
+
+/* ── BADGES ───────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;font-size:9.5px;padding:2px 7px;border-radius:20px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+.badge-orange{background:rgba(249,115,22,.12);color:var(--primary)}
+.badge-cyan{background:rgba(34,211,238,.12);color:var(--cyan)}
+.badge-green{background:rgba(34,197,94,.12);color:var(--success)}
+.badge-red{background:rgba(239,68,68,.12);color:var(--danger)}
+.badge-purple{background:rgba(167,139,250,.12);color:var(--purple)}
+.badge-yellow{background:rgba(234,179,8,.12);color:var(--warning)}
+.badge-gray{background:rgba(100,116,139,.12);color:var(--muted)}
+
+/* ── UTILITIES ────────────────────────────────────────────── */
 .mono{font-family:var(--fmono);font-size:11px}
-.currency{font-family:var(--fmono);font-size:12px;color:var(--success)}
-.grand-row td{background:var(--card3);font-weight:700;color:var(--text)}
-.act-btns{display:flex;gap:6px}
-.act-btn{width:28px;height:28px;border-radius:7px;border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;font-size:12px;transition:all .2s}
-.act-btn.del{background:rgba(239,68,68,.1);color:var(--danger)}
-.act-btn.del:hover{background:var(--danger);color:#fff}
-.act-btn.add-rab{background:rgba(34,197,94,.1);color:var(--success)}
-.act-btn.add-rab:hover{background:var(--success);color:#fff}
+.currency{font-family:var(--fmono);font-size:11.5px;color:var(--success)}
+.text-muted{color:var(--muted)}
+.text-dim{color:var(--dim)}
+.text-primary{color:var(--primary)}
+.fw-bold{font-weight:600}
+.best-price-row td{background:rgba(34,197,94,.04)!important}
 
-/* GRAND TOTAL BOX */
-.grand-box{background:linear-gradient(135deg,rgba(249,115,22,.1),rgba(249,115,22,.04));
-  border:1px solid var(--primary-b);border-radius:12px;padding:18px 20px;
-  display:flex;justify-content:space-between;align-items:center;margin-top:20px}
-.gb-label{font-family:var(--fdisp);font-size:14px;font-weight:700;letter-spacing:1px;color:var(--dim);text-transform:uppercase}
-.gb-val{font-family:var(--fmono);font-size:26px;font-weight:700;color:var(--primary)}
-
-/* TOAST */
-.toast-wrap{position:fixed;top:20px;right:20px;z-index:999;display:flex;flex-direction:column;gap:10px}
-.toast{display:flex;align-items:center;gap:12px;padding:14px 18px;border-radius:12px;
-  font-size:13px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.4);
-  animation:tin .3s ease;min-width:260px}
-.toast.success{background:rgba(22,27,39,.95);border:1px solid var(--success);color:var(--success)}
-.toast.error{background:rgba(22,27,39,.95);border:1px solid var(--danger);color:var(--danger)}
-.toast.info{background:rgba(22,27,39,.95);border:1px solid var(--cyan);color:var(--cyan)}
-@keyframes tin{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
-
-/* MODAL */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;
-  align-items:center;justify-content:center;padding:16px}
-.modal-bg.open{display:flex}
-.modal{background:var(--card);border:1px solid var(--border);border-radius:16px;
-  padding:28px;max-width:440px;width:100%;animation:mIn .25s ease}
-@keyframes mIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-.modal-title{font-family:var(--fdisp);font-size:20px;font-weight:700;margin-bottom:10px}
-.modal-body{color:var(--dim);font-size:13px;line-height:1.6;margin-bottom:20px}
-.modal-actions{display:flex;gap:10px;justify-content:flex-end}
-.btn-cancel{padding:9px 20px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--dim);font-size:13px;cursor:pointer}
-.btn-confirm-del{padding:9px 20px;background:var(--danger);border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer}
-
-/* LOADING */
-.loader{display:flex;align-items:center;justify-content:center;padding:40px;gap:12px;color:var(--muted)}
-.spin{width:22px;height:22px;border:3px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:rot .7s linear infinite}
+/* ── LOADER / EMPTY ───────────────────────────────────────── */
+.loader{display:flex;align-items:center;justify-content:center;padding:44px;gap:11px;color:var(--muted)}
+.spin{width:20px;height:20px;border:2.5px solid var(--border);border-top-color:var(--primary);border-radius:50%;animation:rot .7s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
+.empty-state{text-align:center;padding:44px 20px;color:var(--muted)}
+.empty-state i{font-size:32px;display:block;margin-bottom:10px;opacity:.2}
+.empty-state p{font-size:12.5px;margin-bottom:0}
 
-/* ── Overlay: hidden by default, never blocks desktop clicks ── */
-.overlay{
-  display:block;
-  position:fixed;inset:0;background:rgba(0,0,0,.6);
-  z-index:98;
-  opacity:0;
-  pointer-events:none;
-  transition:opacity .3s;
-}
-.overlay.open{opacity:1;pointer-events:auto;}
+/* ── KEYFRAMES ────────────────────────────────────────────── */
+@keyframes tin{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes mIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
 
-@media(max-width:1100px){.ahsp-wrap{grid-template-columns:1fr}}
-@media(max-width:900px){
-  .sidebar{transform:translateX(-100%)}
-  .sidebar.open{transform:translateX(0)}
+/* ── RESPONSIVE ───────────────────────────────────────────── */
+@media(max-width:920px){
+  .sidebar{transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}
   .main{margin-left:0}.menu-btn{display:flex}
-  .rab-wrap{grid-template-columns:1fr}.ahsp-list-card{position:static}
+  .panel-grid{grid-template-columns:1fr}
+  .form-card{position:static!important}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .chart-grid{grid-template-columns:1fr}
 }
-@media(max-width:480px){.content{padding:16px}.topbar{padding:0 16px}.frow3{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.stats-grid{grid-template-columns:1fr}.content{padding:13px}.topbar{padding:0 13px}}
+
+/* ── AHSP SPECIFIC ─────────────────────────────────────────── */
+.ahsp-layout{display:grid;grid-template-columns:1fr 380px;gap:18px;align-items:start}
+.builder-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:20px}
+.item-row{background:var(--card2);border:1px solid var(--border);border-radius:var(--r-md);padding:12px 14px;position:relative;margin-bottom:8px}
+.item-row-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.jenis-mat{background:rgba(249,115,22,.1);color:var(--primary)}
+.jenis-upah{background:rgba(34,211,238,.1);color:var(--cyan)}
+.jenis-alat{background:rgba(167,139,250,.1);color:var(--purple)}
+.item-calc{display:flex;align-items:center;gap:6px;margin-top:8px;font-family:var(--fmono);font-size:10.5px;color:var(--muted);flex-wrap:wrap}
+.item-calc .eq{color:var(--border2)}.item-calc .result{color:var(--success);font-weight:600}
+.add-btns{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.btn-add-item{display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--r-md);font-size:11px;font-weight:600;cursor:pointer;transition:all .18s;border:1px solid}
+.bi-mat{background:var(--primary-d);border-color:var(--primary-b);color:var(--primary)}.bi-mat:hover{background:var(--primary);color:#fff}
+.bi-upah{background:rgba(34,211,238,.07);border-color:rgba(34,211,238,.18);color:var(--cyan)}.bi-upah:hover{background:var(--cyan);color:#000}
+.bi-alat{background:rgba(167,139,250,.07);border-color:rgba(167,139,250,.18);color:var(--purple)}.bi-alat:hover{background:var(--purple);color:#fff}
+.breakdown-box{background:var(--card2);border:1px solid var(--border);border-radius:var(--r-md);padding:14px;margin-bottom:14px}
+.breakdown-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.breakdown-row:last-child{border:none;padding-top:10px}
+.breakdown-row.total{font-family:var(--fdisp);font-size:16px;font-weight:700}
+.breakdown-label{color:var(--dim)}
+.breakdown-val{font-family:var(--fmono);font-size:12px}
+.pct-input{width:64px;padding:4px 8px;background:var(--card);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--fmono);font-size:12px;outline:none;text-align:right;transition:border-color .18s}
+.pct-input:focus{border-color:var(--primary)}
+.ahsp-list-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;position:sticky;top:62px}
+.alc-head{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.ahsp-item{padding:14px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.ahsp-item:hover{background:rgba(255,255,255,.02)}
+.ahsp-item.selected{background:var(--primary-d);border-left:2px solid var(--primary)}
+.ai-id{font-family:var(--fmono);font-size:10px;color:var(--muted)}
+.ai-name{font-size:13px;font-weight:600;color:var(--text);margin:3px 0}
+.ai-total{font-family:var(--fmono);font-size:12px;color:var(--success)}
+.ai-grand{font-family:var(--fmono);font-size:11px;color:var(--primary);margin-top:1px}
+.ai-meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.ai-del{width:24px;height:24px;border-radius:6px;border:none;background:rgba(239,68,68,.08);color:var(--danger);cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
+.ai-del:hover{background:var(--danger);color:#fff}
+.export-bar{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--border);background:var(--card2)}
+/* AHSP detail modal */
+.detail-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:5000;align-items:center;justify-content:center;padding:16px}
+.detail-modal.open{display:flex}
+.detail-modal-box{background:var(--card);border:1px solid var(--border);border-radius:var(--r-xl);padding:26px;max-width:780px;width:100%;max-height:90vh;overflow-y:auto;animation:mIn .22s ease}
+/* Empty placeholder */
+.item-placeholder{padding:24px;text-align:center;color:var(--muted);font-size:12.5px;background:var(--card2);border-radius:var(--r-md);border:1px dashed var(--border2)}
+.item-placeholder i{font-size:28px;display:block;margin-bottom:8px;opacity:.22}
+/* Checkbox for export select */
+.ahsp-item input[type=checkbox]{accent-color:var(--primary);width:14px;height:14px;cursor:pointer;flex-shrink:0}
+@media(max-width:920px){.ahsp-layout{grid-template-columns:1fr}.ahsp-list-card{position:static}}
 </style>
 </head>
 <body>
-<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
-<div class="toast-wrap" id="toastWrap"></div>
+<div id="sidebarMount"></div>
 
-<!-- CONFIRM MODAL -->
-<div class="modal-bg" id="confirmModal">
-  <div class="modal">
-    <div class="modal-title" id="modalTitle">Konfirmasi Hapus</div>
-    <div class="modal-body" id="modalBody">Yakin ingin menghapus data ini?</div>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">Batal</button>
-      <button class="btn-confirm-del" id="modalConfirm">Hapus</button>
+<!-- AHSP DETAIL MODAL -->
+<div class="detail-modal" id="detailModal">
+  <div class="detail-modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div class="fc-title" style="margin:0"><i class="fas fa-eye"></i> Detail AHSP</div>
+      <button onclick="closeDetailModal()" class="btn btn-secondary btn-sm"><i class="fas fa-times"></i></button>
     </div>
+    <div id="detailModalContent"></div>
   </div>
 </div>
 
-<!-- SIDEBAR -->
-<aside class="sidebar" id="sidebar">
-  <div class="sb-top">
-    <div class="logo">
-      <div class="logo-ico"><i class="fas fa-hard-hat"></i></div>
-      <div><div class="logo-nm">QS MANAGER</div><div class="logo-sub">Construction System</div></div>
-    </div>
-  </div>
-  <nav class="sb-nav">
-    <div class="nav-section">Menu Utama</div>
-    <a href="dashboard.html"     class="nav-item" id="nav-dashboard"><i class="fas fa-chart-pie"></i> Dashboard</a>
-    <a href="material.html"      class="nav-item" id="nav-material"><i class="fas fa-boxes-stacked"></i> Material</a>
-    <a href="material.html#upah" class="nav-item" id="nav-upah"><i class="fas fa-people-carry-box"></i> Upah</a>
-    <a href="material.html#alat" class="nav-item" id="nav-alat"><i class="fas fa-wrench"></i> Alat</a>
-    <a href="ahsp.html"          class="nav-item" id="nav-ahsp"  onclick="return navTo('ahsp')"><i class="fas fa-calculator"></i> AHSP</a>
-    <a href="ahsp.html#rab"      class="nav-item" id="nav-rab"   onclick="return navTo('rab')"><i class="fas fa-file-invoice-dollar"></i> RAB</a>
-    <div class="nav-section">Sistem</div>
-    <a href="index.html" class="nav-item" id="nav-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Keluar</a>
-  </nav>
-  <div class="sb-foot">
-    <div class="user-card">
-      <div class="user-av"><i class="fas fa-user"></i></div>
-      <div><div class="user-nm" id="userName">—</div><div class="user-role" id="userRole">—</div></div>
-      <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
-    </div>
-  </div>
-</aside>
-
-<!-- MAIN -->
 <main class="main">
   <div class="topbar">
     <button class="menu-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
-    <span class="page-title"><i class="fas fa-calculator" style="color:var(--primary);margin-right:8px"></i>AHSP & RAB</span>
+    <div class="page-title"><i class="fas fa-calculator"></i> AHSP Builder</div>
     <div class="topbar-right">
-      <button onclick="exportRABcsv()" style="display:flex;align-items:center;gap:7px;padding:8px 14px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--dim);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor='var(--success)';this.style.color='var(--success)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--dim)'">
-        <i class="fas fa-file-csv"></i> Export RAB
-      </button>
+      <button class="btn btn-secondary btn-sm" onclick="exportSelectedExcel()" id="btnExportXL" title="Export AHSP terpilih ke Excel"><i class="fas fa-file-excel"></i> Export Excel</button>
+      <button class="btn btn-secondary btn-sm" onclick="copySelectedTSV()" id="btnCopyTSV" title="Copy TSV ke clipboard (paste ke Spreadsheet)"><i class="fas fa-copy"></i> Copy TSV</button>
     </div>
   </div>
 
   <div class="content">
-    <!-- TABS -->
-    <div class="tabs">
-      <div class="tab" id="tab-ahsp" onclick="openTab('ahsp')"><i class="fas fa-calculator"></i> AHSP Builder</div>
-      <div class="tab" id="tab-rab"  onclick="openTab('rab')"><i class="fas fa-file-invoice-dollar"></i> RAB Proyek</div>
+    <div class="ahsp-layout">
+
+      <!-- LEFT: BUILDER FORM -->
+      <div>
+        <div class="builder-card" id="builderCard">
+          <div class="fc-title"><i class="fas fa-hammer"></i> <span id="builderTitle">Input AHSP Baru</span></div>
+          <input type="hidden" id="ahspEditId">
+
+          <div class="fgroup">
+            <label class="flabel">Nama Pekerjaan <span class="req">*</span></label>
+            <input id="ahspNama" class="finput" placeholder="Contoh: Pekerjaan Pondasi Beton Bertulang K-350">
+          </div>
+
+          <!-- ITEM LIST -->
+          <div class="fgroup">
+            <label class="flabel">Komponen AHSP</label>
+            <div id="ahspItemList">
+              <div class="item-placeholder"><i class="fas fa-plus-circle"></i>Klik tombol di bawah untuk menambahkan komponen</div>
+            </div>
+          </div>
+
+          <div class="add-btns">
+            <button class="btn-add-item bi-mat" onclick="addItem('material')"><i class="fas fa-boxes-stacked"></i> + Material</button>
+            <button class="btn-add-item bi-upah" onclick="addItem('upah')"><i class="fas fa-user-tie"></i> + Upah</button>
+            <button class="btn-add-item bi-alat" onclick="addItem('alat')"><i class="fas fa-wrench"></i> + Alat</button>
+          </div>
+
+          <!-- BREAKDOWN BOX -->
+          <div class="breakdown-box">
+            <div class="breakdown-row">
+              <span class="breakdown-label">Subtotal AHSP</span>
+              <span class="breakdown-val" id="bdSubtotal">Rp 0</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">
+                Overhead &nbsp;
+                <input type="number" step="any" min="0" max="100" class="pct-input" id="pctOverhead" value="0" oninput="recalcBreakdown()" placeholder="0">%
+              </span>
+              <span class="breakdown-val" id="bdOverhead">+ Rp 0</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">
+                Contractor Fee &nbsp;
+                <input type="number" step="any" min="0" max="100" class="pct-input" id="pctFee" value="0" oninput="recalcBreakdown()" placeholder="0">%
+              </span>
+              <span class="breakdown-val" id="bdFee">+ Rp 0</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">
+                Pajak PPH &nbsp;
+                <input type="number" step="any" min="0" max="100" class="pct-input" id="pctPPH" value="0" oninput="recalcBreakdown()" placeholder="0">%
+              </span>
+              <span class="breakdown-val" id="bdPPH">+ Rp 0</span>
+            </div>
+            <div class="breakdown-row total">
+              <span style="color:var(--text)">GRAND TOTAL</span>
+              <span style="color:var(--primary);font-size:20px" id="bdGrand">Rp 0</span>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-full" id="ahspSaveBtn" onclick="saveAHSP()">
+            <i class="fas fa-save"></i> <span id="ahspSaveLbl">SIMPAN AHSP</span>
+          </button>
+          <button class="btn btn-secondary btn-full" id="ahspCancelBtn" onclick="cancelEditAHSP()" style="margin-top:7px;display:none">
+            <i class="fas fa-times"></i> Batal Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: AHSP LIST -->
+      <div class="ahsp-list-card">
+        <div class="alc-head">
+          <span style="font-family:var(--fdisp);font-size:15px;font-weight:700;letter-spacing:.5px">AHSP Tersimpan</span>
+          <span class="count-tag" id="ahspCount">0</span>
+        </div>
+        <div style="padding:10px 12px;border-bottom:1px solid var(--border)">
+          <div class="search-box"><i class="fas fa-search"></i>
+            <input id="ahspSearch" placeholder="Cari pekerjaan…" oninput="filterAHSP()" style="font-size:12px">
+          </div>
+        </div>
+        <div id="ahspListBody" style="max-height:600px;overflow-y:auto">
+          <div class="loader"><div class="spin"></div> Memuat…</div>
+        </div>
+        <div class="export-bar">
+          <button class="btn btn-secondary btn-sm" onclick="selectAllAHSP()" title="Pilih semua"><i class="fas fa-check-square"></i> Pilih Semua</button>
+          <button class="btn btn-secondary btn-sm" onclick="deselectAllAHSP()" title="Batal pilih"><i class="fas fa-square"></i> Batal Semua</button>
+        </div>
+      </div>
+
     </div>
-
-    <!-- ══════════════ AHSP PANEL ══════════════ -->
-    <div class="panel active" id="panel-ahsp">
-      <div class="ahsp-wrap">
-
-        <!-- LEFT: BUILDER FORM -->
-        <div>
-          <div class="form-card" style="margin-bottom:20px">
-            <div class="fc-title"><i class="fas fa-hammer"></i> Builder AHSP</div>
-            <div class="fgroup">
-              <label class="flabel">Nama Pekerjaan <span>*</span></label>
-              <input id="ahspNama" class="finput" placeholder="Contoh: Pekerjaan Pondasi Batu Kali 1:4">
-            </div>
-
-            <!-- Item list -->
-            <div class="fgroup">
-              <label class="flabel">Komponen AHSP</label>
-              <div class="item-list" id="ahspItemList">
-                <div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;background:var(--card2);border-radius:10px;border:1px dashed var(--border2)">
-                  <i class="fas fa-plus-circle" style="display:block;font-size:24px;margin-bottom:8px;opacity:.3"></i>
-                  Klik tombol di bawah untuk menambahkan komponen
-                </div>
-              </div>
-            </div>
-
-            <!-- Add item buttons -->
-            <div class="add-item-btns">
-              <button class="btn-add-item mat" onclick="addItem('material')"><i class="fas fa-boxes-stacked"></i> + Material</button>
-              <button class="btn-add-item upah" onclick="addItem('upah')"><i class="fas fa-user-tie"></i> + Upah</button>
-              <button class="btn-add-item alat" onclick="addItem('alat')"><i class="fas fa-wrench"></i> + Alat</button>
-            </div>
-
-            <!-- Total preview -->
-            <div class="total-preview">
-              <div>
-                <div class="tp-label">Total Harga Satuan AHSP</div>
-                <div style="font-size:11px;color:var(--muted);margin-top:3px">Jumlah semua komponen</div>
-              </div>
-              <div class="tp-val" id="ahspTotal">Rp 0</div>
-            </div>
-
-            <button class="btn-primary" id="ahspSaveBtn" onclick="saveAHSP()">
-              <i class="fas fa-save"></i> SIMPAN AHSP
-            </button>
-          </div>
-
-          <!-- DETAIL VIEW (when AHSP item is clicked) -->
-          <div class="form-card" id="ahspDetailCard" style="display:none">
-            <div class="fc-title"><i class="fas fa-eye" style="color:var(--cyan)"></i> Detail AHSP</div>
-            <div id="ahspDetailContent"></div>
-          </div>
-        </div>
-
-        <!-- RIGHT: AHSP LIST -->
-        <div class="ahsp-list-card">
-          <div class="alc-head">
-            <span class="alc-title">Daftar AHSP Tersimpan</span>
-            <span class="alc-count" id="ahspCount">0</span>
-          </div>
-          <div class="search-wrap sw">
-            <i class="fas fa-search"></i>
-            <input class="search-inp" style="padding-left:34px" id="ahspSearch" placeholder="Cari pekerjaan…" oninput="filterAHSP()">
-          </div>
-          <div class="ahsp-items" id="ahspListBody">
-            <div class="loader"><div class="spin"></div> Memuat…</div>
-          </div>
-        </div>
-
-      </div>
-    </div><!-- /ahsp panel -->
-
-    <!-- ══════════════ RAB PANEL ══════════════ -->
-    <div class="panel" id="panel-rab">
-      <div class="rab-wrap">
-
-        <!-- FORM -->
-        <div class="form-card" style="position:sticky;top:80px">
-          <div class="fc-title"><i class="fas fa-file-invoice-dollar"></i> Input Item RAB</div>
-          <div class="fgroup">
-            <label class="flabel">Pilih AHSP <span>*</span></label>
-            <select id="rabAhspSel" class="fsel" onchange="onAHSPSelect()">
-              <option value="">— Pilih Pekerjaan AHSP —</option>
-            </select>
-          </div>
-          <div class="fgroup">
-            <label class="flabel">Nama Pekerjaan <span>*</span></label>
-            <input id="rabNama" class="finput" placeholder="Nama pekerjaan dalam RAB" readonly style="opacity:.7">
-          </div>
-          <div class="frow">
-            <div class="fgroup">
-              <label class="flabel">Volume <span>*</span></label>
-              <input id="rabVol" type="number" class="finput" placeholder="0" oninput="calcRABTotal()">
-            </div>
-            <div class="fgroup">
-              <label class="flabel">Satuan <span>*</span></label>
-              <input id="rabSatuan" class="finput" placeholder="m², m³, bh…">
-            </div>
-          </div>
-          <div class="fgroup">
-            <label class="flabel">Harga Satuan (Rp)</label>
-            <input id="rabHarga" type="number" class="finput" placeholder="Otomatis dari AHSP" oninput="calcRABTotal()">
-          </div>
-
-          <!-- CALC PREVIEW -->
-          <div style="background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:16px">
-            <div style="font-size:10px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:8px">Preview Total</div>
-            <div style="display:flex;align-items:center;gap:8px;font-family:var(--fmono);font-size:12px;color:var(--dim)">
-              <span id="rabPrevVol">0</span>
-              <span style="color:var(--muted)">×</span>
-              <span id="rabPrevHarga">Rp 0</span>
-              <span style="color:var(--muted)">=</span>
-              <span id="rabPrevTotal" style="color:var(--primary);font-size:15px;font-weight:600">Rp 0</span>
-            </div>
-          </div>
-
-          <button class="btn-primary" onclick="saveRAB()"><i class="fas fa-plus-circle"></i> TAMBAHKAN KE RAB</button>
-        </div>
-
-        <!-- TABLE -->
-        <div>
-          <div class="section-title" style="margin-bottom:16px"><i class="fas fa-table-list"></i> Rencana Anggaran Biaya</div>
-          <div class="data-card">
-            <div class="data-toolbar">
-              <div style="position:relative;flex:1;min-width:180px">
-                <i class="fas fa-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:12px"></i>
-                <input class="search-inp" style="padding-left:32px;width:100%" id="rabSearch" placeholder="Cari item RAB…" oninput="filterRAB()">
-              </div>
-              <span style="font-family:var(--fmono);font-size:11px;color:var(--muted);white-space:nowrap" id="rabCount">0 item</span>
-            </div>
-            <div class="tbl-wrap">
-              <table class="tbl">
-                <thead>
-                  <tr>
-                    <th>No.</th>
-                    <th>Kode AHSP</th>
-                    <th>Nama Pekerjaan</th>
-                    <th>Volume</th>
-                    <th>Sat.</th>
-                    <th>Harga Satuan</th>
-                    <th>Total</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="rabBody">
-                  <tr><td colspan="8"><div class="loader"><div class="spin"></div> Memuat…</div></td></tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- GRAND TOTAL -->
-          <div class="grand-box" id="grandBox">
-            <div class="gb-label">Grand Total RAB Proyek</div>
-            <div class="gb-val" id="grandTotal">Rp 0</div>
-          </div>
-        </div>
-      </div>
-    </div><!-- /rab panel -->
-
   </div>
 </main>
 
 <script>
+/* ============================================================
+   QS Manager — Shared Module v3.0
+   Embed this <script> block in every page.
+   ============================================================ */
+
 // ── CONFIG ───────────────────────────────────────────────────
-const API_URL = 'https://script.google.com/macros/s/AKfycbwazl0w0bpFCwPqtJYdhuNlvtsvz_xYUYD8rFm8W9SfV6nkfgtFfQ9506SDYN3EObM/exec';
+const API_URL = 'YOUR_GAS_WEBAPP_URL';
 
-// ── AUTH ─────────────────────────────────────────────────────
-function checkAuth(){if(sessionStorage.getItem('loggedIn')!=='1'){location.href='index.html';return null;}return JSON.parse(sessionStorage.getItem('user')||'{}')}
-function logout(){sessionStorage.clear();location.href='index.html'}
-function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('overlay').classList.toggle('open')}
-function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('open')}
+// ── RBAC ─────────────────────────────────────────────────────
+const ROLE_PERMS = {
+  admin:      ['dashboard','material','upah','alat','vendor','analisa','ahsp','users','delete','export','print'],
+  qs:         ['dashboard','material','upah','alat','ahsp','export'],
+  purchasing: ['dashboard','material','vendor','analisa','export','print']
+};
 
-// ── STATE ────────────────────────────────────────────────────
-let materials=[], upahList=[], alatList=[], ahspList=[], rabList=[];
-let ahspItems=[];   // current form items
-let ahspFiltered=[], rabFiltered=[];
-let deleteCallback=null;
+const MENU_CONFIG = [
+  { id:'dashboard', label:'Dashboard',      icon:'fa-chart-pie',      href:'dashboard.html',        section:'main' },
+  { id:'material',  label:'Material',       icon:'fa-boxes-stacked',  href:'material.html',         section:'main' },
+  { id:'upah',      label:'Upah',           icon:'fa-people-carry-box',href:'material.html#upah',   section:'main' },
+  { id:'alat',      label:'Alat',           icon:'fa-wrench',         href:'material.html#alat',    section:'main' },
+  { id:'vendor',    label:'Vendor',         icon:'fa-store',          href:'vendor.html',           section:'main' },
+  { id:'analisa',   label:'Analisa Harga',  icon:'fa-chart-column',   href:'material.html#analisa', section:'main' },
+  { id:'ahsp',      label:'AHSP Builder',   icon:'fa-calculator',     href:'ahsp.html',             section:'main' },
+  { id:'users',     label:'User Management',icon:'fa-users-gear',     href:'users.html',            section:'admin'},
+];
 
-// ── TOAST ────────────────────────────────────────────────────
-function toast(msg,type='success'){
-  const el=document.createElement('div');el.className=`toast ${type}`;
-  const ico={success:'fa-check-circle',error:'fa-exclamation-circle',info:'fa-info-circle'}[type]||'fa-info-circle';
-  el.innerHTML=`<i class="fas ${ico}"></i> ${msg}`;
-  document.getElementById('toastWrap').appendChild(el);
-  setTimeout(()=>el.style.opacity='0',2800);setTimeout(()=>el.remove(),3100);
-}
+// ── SESSION ───────────────────────────────────────────────────
+const QSAuth = {
+  SESSION_KEY: 'qs_session',
+  SESSION_TTL: 8 * 60 * 60 * 1000, // 8 hours
 
-// ── MODAL ────────────────────────────────────────────────────
-function showConfirm(title,body,cb){
-  document.getElementById('modalTitle').textContent=title;
-  document.getElementById('modalBody').textContent=body;
-  document.getElementById('confirmModal').classList.add('open');
-  document.getElementById('modalConfirm').onclick=()=>{closeModal();cb();};
-}
-function closeModal(){document.getElementById('confirmModal').classList.remove('open')}
-
-// ── API ──────────────────────────────────────────────────────
-async function apiGet(action,params={}){
-  const qs=new URLSearchParams({action,...params}).toString();
-  const r=await fetch(`${API_URL}?${qs}`);return r.json();
-}
-async function apiPost(payload){
-  const r=await fetch(API_URL,{method:'POST',redirect:'follow',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
-  return r.json();
-}
-const rupiah=n=>'Rp '+Number(n||0).toLocaleString('id-ID');
-
-// ── TAB & HASH ROUTING ───────────────────────────────────────
-const VALID_TABS = ['ahsp','rab'];
-
-// Called by sidebar nav links on THIS page (prevents full reload)
-function navTo(tab) {
-  openTab(tab);
-  return false; // prevent default href navigation
-}
-
-// Called by tab buttons (user clicked a tab)
-function openTab(tab) {
-  switchTab(tab, true);
-}
-
-// Core switcher — called internally and by hashchange
-function switchTab(tab, updateHash = false) {
-  if (!VALID_TABS.includes(tab)) tab = 'ahsp';
-
-  VALID_TABS.forEach(t => {
-    const btn   = document.getElementById(`tab-${t}`);
-    const panel = document.getElementById(`panel-${t}`);
-    if (btn)   btn.className   = 'tab'   + (t === tab ? ' active' : '');
-    if (panel) panel.className = 'panel' + (t === tab ? ' active' : '');
-  });
-
-  // Side effects per tab
-  if (tab === 'rab') buildRABForm();
-
-  // Update URL hash without triggering hashchange listener
-  if (updateHash) {
-    const newHash = (tab === 'ahsp') ? '' : '#' + tab;
-    history.replaceState(null, '', location.pathname + newHash);
+  save(user, token) {
+    const sess = { user, token, ts: Date.now() };
+    sessionStorage.setItem(this.SESSION_KEY, JSON.stringify(sess));
+  },
+  load() {
+    try {
+      const raw = sessionStorage.getItem(this.SESSION_KEY);
+      if (!raw) return null;
+      const sess = JSON.parse(raw);
+      if (Date.now() - sess.ts > this.SESSION_TTL) { this.clear(); return null; }
+      return sess;
+    } catch(e) { return null; }
+  },
+  clear() { sessionStorage.removeItem(this.SESSION_KEY); },
+  getUser() { return this.load()?.user || null; },
+  getRole() { return this.load()?.user?.role || null; },
+  can(perm) { return (ROLE_PERMS[this.getRole()] || []).includes(perm); },
+  requireAuth(redirectTo = 'index.html') {
+    const sess = this.load();
+    if (!sess) { location.href = redirectTo; return null; }
+    return sess.user;
+  },
+  requirePerm(perm, redirectTo = 'dashboard.html') {
+    const user = this.requireAuth();
+    if (!user) return null;
+    if (!this.can(perm)) { location.href = redirectTo; return null; }
+    return user;
   }
+};
 
-  syncSidebarActive(tab);
+// ── SIDEBAR BUILDER ────────────────────────────────────────────
+function buildSidebar(activeId) {
+  const role = QSAuth.getRole() || '';
+  const perms = ROLE_PERMS[role] || [];
+  const user  = QSAuth.getUser() || {};
+
+  const ROLE_BADGE = { admin:'badge-red', qs:'badge-cyan', purchasing:'badge-purple' };
+
+  const navItems = MENU_CONFIG.filter(m => perms.includes(m.id)).map(m => `
+    <a href="${m.href}" class="nav-item${m.id === activeId ? ' active' : ''}" id="nav-${m.id}">
+      <i class="fas ${m.icon}"></i> ${m.label}
+    </a>`).join('');
+
+  const adminSection = role === 'admin' ? `
+    <div class="nav-section">Admin</div>
+    <a href="users.html" class="nav-item${activeId === 'users' ? ' active' : ''}" id="nav-users">
+      <i class="fas fa-users-gear"></i> User Management
+    </a>` : '';
+
+  return `
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-top">
+      <div class="logo">
+        <div class="logo-ico"><i class="fas fa-hard-hat"></i></div>
+        <div><div class="logo-nm">QS MANAGER</div><div class="logo-sub">Construction System</div></div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-section">Menu</div>
+      ${navItems}
+      ${adminSection}
+      <div class="nav-section">Akun</div>
+      <a href="#" class="nav-item" onclick="logout();return false;"><i class="fas fa-sign-out-alt"></i> Keluar</a>
+    </nav>
+    <div class="sb-foot">
+      <div class="user-card">
+        <div class="user-av"><i class="fas fa-user"></i></div>
+        <div>
+          <div class="user-nm">${user.fullName || user.username || '—'}</div>
+          <span class="badge ${ROLE_BADGE[role]||'badge-cyan'}" style="font-size:9px;margin-top:2px">${role.toUpperCase()}</span>
+        </div>
+        <button class="btn-logout" onclick="logout()" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+      </div>
+    </div>
+  </aside>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>`;
 }
 
-// Map tab key → nav-item ID
-const TAB_NAV_MAP = { ahsp: 'nav-ahsp', rab: 'nav-rab' };
-
-function syncSidebarActive(activeTab) {
-  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-  const targetId = TAB_NAV_MAP[activeTab];
-  if (targetId) document.getElementById(targetId)?.classList.add('active');
+function initSidebar(activeId) {
+  document.getElementById('sidebarMount').innerHTML = buildSidebar(activeId);
 }
 
-// Read hash → activate correct tab, listen for future changes
-function initHashRouting() {
-  function applyHash() {
-    const hash = location.hash.replace('#', '');
-    switchTab(VALID_TABS.includes(hash) ? hash : 'ahsp', false);
+// ── SIDEBAR TOGGLE ─────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar')?.classList.remove('open');
+  document.getElementById('overlay')?.classList.remove('open');
+}
+
+// ── AUTH ───────────────────────────────────────────────────────
+function logout() { QSAuth.clear(); location.href = 'index.html'; }
+
+// ── API HELPERS ────────────────────────────────────────────────
+const QSApi = {
+  async get(action, params = {}) {
+    const qs = new URLSearchParams({ action, ...params }).toString();
+    const r  = await fetch(`${API_URL}?${qs}`);
+    return r.json();
+  },
+  async post(payload) {
+    const r = await fetch(API_URL, {
+      method: 'POST', redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    return r.json();
   }
-  applyHash();
-  window.addEventListener('hashchange', applyHash);
+};
+
+// ── FORMAT UTILS ───────────────────────────────────────────────
+const Fmt = {
+  rupiah: n => 'Rp\u00A0' + Number(n||0).toLocaleString('id-ID'),
+  pct:    n => Number(n||0).toFixed(2).replace(/\.00$/,'') + '%',
+  num:    n => Number(n||0).toLocaleString('id-ID'),
+  dec:    (n, d=6) => parseFloat(n||0).toFixed(d).replace(/\.?0+$/,'')
+};
+
+// ── TOAST ──────────────────────────────────────────────────────
+function toast(msg, type = 'success', duration = 3000) {
+  let wrap = document.getElementById('toastWrap');
+  if (!wrap) { wrap = document.createElement('div'); wrap.id = 'toastWrap'; wrap.style.cssText = 'position:fixed;top:18px;right:18px;z-index:9999;display:flex;flex-direction:column;gap:8px'; document.body.appendChild(wrap); }
+  const ICO = { success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle', warning:'fa-triangle-exclamation' };
+  const COL = { success:'var(--success)', error:'var(--danger)', info:'var(--cyan)', warning:'var(--warning)' };
+  const el = document.createElement('div');
+  el.style.cssText = `display:flex;align-items:center;gap:10px;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;min-width:240px;background:rgba(22,27,39,.97);border:1px solid ${COL[type]||COL.info};color:${COL[type]||COL.info};box-shadow:0 8px 32px rgba(0,0,0,.5);animation:tin .3s ease;transition:opacity .4s`;
+  el.innerHTML = `<i class="fas ${ICO[type]||ICO.info}"></i> ${msg}`;
+  wrap.appendChild(el);
+  setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 400); }, duration);
 }
 
-// ══════════════════════════════════════════════════════════════
-// DEMO DATA
-// ══════════════════════════════════════════════════════════════
+// ── CONFIRM MODAL ──────────────────────────────────────────────
+function showConfirm(title, body, onConfirm, confirmLabel = 'Hapus', confirmColor = 'var(--danger)') {
+  let existing = document.getElementById('_confirmModal');
+  if (existing) existing.remove();
+  const m = document.createElement('div');
+  m.id = '_confirmModal';
+  m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:8000;display:flex;align-items:center;justify-content:center;padding:16px';
+  m.innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;max-width:400px;width:100%;animation:mIn .2s ease">
+      <div style="font-family:var(--fdisp);font-size:20px;font-weight:700;margin-bottom:8px">${title}</div>
+      <div style="color:var(--dim);font-size:13px;line-height:1.6;margin-bottom:20px">${body}</div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="document.getElementById('_confirmModal').remove()" style="padding:9px 20px;background:var(--card2);border:1px solid var(--border);border-radius:8px;color:var(--dim);font-size:13px;cursor:pointer">Batal</button>
+        <button id="_confirmBtn" style="padding:9px 20px;background:${confirmColor};border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer">${confirmLabel}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+  document.getElementById('_confirmBtn').onclick = () => { m.remove(); onConfirm(); };
+}
+
+// ── DEBOUNCE ───────────────────────────────────────────────────
+function debounce(fn, ms = 350) {
+  let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+// ── CLOCK ──────────────────────────────────────────────────────
+function startClock(elId) {
+  const tick = () => {
+    const el = document.getElementById(elId);
+    if (el) el.textContent = new Date().toLocaleString('id-ID',{weekday:'short',day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  };
+  tick(); setInterval(tick, 60000);
+}
+
+// ── EXPORT CSV ─────────────────────────────────────────────────
+function exportCSV(headers, rows, filename) {
+  const csv = [headers, ...rows].map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = 'data:text/csv;charset=utf-8,\uFEFF' + encodeURIComponent(csv);
+  a.download = filename; a.click();
+}
+
+// ── SKELETON LOADING ────────────────────────────────────────────
+function skeletonRows(cols, count = 5) {
+  const cell = `<td><div style="height:12px;background:var(--card3);border-radius:4px;animation:pulse 1.5s ease infinite"></div></td>`;
+  return Array(count).fill(`<tr>${cell.repeat(cols)}</tr>`).join('');
+}
+
+// ── STATE ─────────────────────────────────────────────────────
+let materials=[], upahList=[], alatList=[], ahspList=[], ahspFiltered=[];
+let ahspItems=[], itemIdx=0;
+let selectedAHSP=new Set();
+const isDemo=()=>API_URL==='YOUR_GAS_WEBAPP_URL';
+
+// ── DEMO DATA ──────────────────────────────────────────────────
 function demoMaterials(){return[
   {id:'MAT-0001',nama:'Beton K-350',harga:1250000,satuan:'m³'},
-  {id:'MAT-0002',nama:'Besi Beton D16',harga:18500,satuan:'kg'},
-  {id:'MAT-0003',nama:'Besi Beton D12',harga:17800,satuan:'kg'},
-  {id:'MAT-0004',nama:'Semen Portland 50kg',harga:78000,satuan:'sak'},
-  {id:'MAT-0005',nama:'Pasir Beton',harga:325000,satuan:'m³'},
-  {id:'MAT-0006',nama:'Batu Split 2/3',harga:285000,satuan:'m³'},
-  {id:'MAT-0007',nama:'Plywood 18mm',harga:320000,satuan:'lbr'},
-  {id:'MAT-0008',nama:'Keramik 60×60',harga:185000,satuan:'m²'},
+  {id:'MAT-0002',nama:'Beton K-400',harga:1350000,satuan:'m³'},
+  {id:'MAT-0003',nama:'Besi Beton D16',harga:18500,satuan:'kg'},
+  {id:'MAT-0004',nama:'Besi Beton D12',harga:17500,satuan:'kg'},
+  {id:'MAT-0005',nama:'Besi Beton D10',harga:17000,satuan:'kg'},
+  {id:'MAT-0006',nama:'Semen Portland 50kg',harga:78000,satuan:'sak'},
+  {id:'MAT-0007',nama:'Pasir Beton',harga:325000,satuan:'m³'},
+  {id:'MAT-0008',nama:'Agregat Kasar 2/3',harga:285000,satuan:'m³'},
+  {id:'MAT-0009',nama:'Plywood 18mm',harga:320000,satuan:'lbr'},
+  {id:'MAT-0010',nama:'Kayu Kaso 5/7',harga:85000,satuan:'btg'},
+  {id:'MAT-0011',nama:'Kawat Bendrat',harga:25000,satuan:'kg'},
+  {id:'MAT-0012',nama:'Minyak Bekisting',harga:18000,satuan:'ltr'},
 ];}
 function demoUpah(){return[
   {id:'UPH-0001',nama:'Mandor',harga:350000,satuan:'OH'},
@@ -574,385 +593,409 @@ function demoUpah(){return[
   {id:'UPH-0003',nama:'Tukang Batu',harga:250000,satuan:'OH'},
   {id:'UPH-0004',nama:'Tukang Besi',harga:260000,satuan:'OH'},
   {id:'UPH-0005',nama:'Pembantu Tukang',harga:180000,satuan:'OH'},
+  {id:'UPH-0006',nama:'Tukang Kayu',harga:255000,satuan:'OH'},
 ];}
 function demoAlat(){return[
   {id:'ALT-0001',nama:'Concrete Mixer 0.3m³',harga:45000,satuan:'jam'},
   {id:'ALT-0002',nama:'Concrete Vibrator',harga:35000,satuan:'jam'},
   {id:'ALT-0003',nama:'Bar Cutter & Bender',harga:150000,satuan:'hari'},
+  {id:'ALT-0004',nama:'Pompa Air',harga:25000,satuan:'jam'},
 ];}
 function demoAHSP(){return[
-  {id:'AHSP-0001',namaPekerjaan:'Pekerjaan Pondasi Beton Bertulang',totalAHSP:1856250,
+  {id:'AHSP-0001',namaPekerjaan:'Pekerjaan Pondasi Beton Bertulang K-350',
+   overhead:10,contractorFee:5,pph:2,
+   totalAHSP:3547500,grandTotal:4201965,
    items:[
-     {jenis:'material',item:'Beton K-350',koefisien:1.0,hargaSatuan:1250000,jumlah:1250000},
+     {jenis:'material',item:'Beton K-350',koefisien:1,hargaSatuan:1250000,jumlah:1250000},
      {jenis:'material',item:'Besi Beton D16',koefisien:120,hargaSatuan:18500,jumlah:2220000},
-     {jenis:'upah',item:'Tukang Beton',koefisien:1.5,hargaSatuan:250000,jumlah:375000},
+     {jenis:'material',item:'Kawat Bendrat',koefisien:1.5,hargaSatuan:25000,jumlah:37500},
+     {jenis:'upah',item:'Tukang Besi',koefisien:1.5,hargaSatuan:260000,jumlah:390000},
      {jenis:'upah',item:'Mandor',koefisien:0.15,hargaSatuan:350000,jumlah:52500},
      {jenis:'alat',item:'Concrete Vibrator',koefisien:3,hargaSatuan:35000,jumlah:105000},
    ]},
-  {id:'AHSP-0002',namaPekerjaan:'Pasangan Bata Ringan AAC t=10cm',totalAHSP:378500,
+  {id:'AHSP-0002',namaPekerjaan:'Pasangan Bata Ringan AAC t=10cm',
+   overhead:8,contractorFee:5,pph:2,
+   totalAHSP:378500,grandTotal:440811,
    items:[
      {jenis:'material',item:'Bata Ringan AAC',koefisien:83,hargaSatuan:2500,jumlah:207500},
      {jenis:'material',item:'Mortar Perekat',koefisien:11.5,hargaSatuan:6500,jumlah:74750},
      {jenis:'upah',item:'Tukang Batu',koefisien:0.35,hargaSatuan:250000,jumlah:87500},
      {jenis:'upah',item:'Pembantu Tukang',koefisien:0.05,hargaSatuan:180000,jumlah:9000},
    ]},
-  {id:'AHSP-0003',namaPekerjaan:'Pemasangan Keramik Lantai 60×60',totalAHSP:456000,
-   items:[
-     {jenis:'material',item:'Keramik 60×60',koefisien:1.05,hargaSatuan:185000,jumlah:194250},
-     {jenis:'material',item:'Semen PC 50kg',koefisien:0.8,hargaSatuan:78000,jumlah:62400},
-     {jenis:'upah',item:'Tukang Keramik',koefisien:0.7,hargaSatuan:280000,jumlah:196000},
-     {jenis:'upah',item:'Pembantu Tukang',koefisien:0.2,hargaSatuan:180000,jumlah:36000},
-   ]},
-];}
-function demoRAB(){return[
-  {id:'RAB-0001',kodeAHSP:'AHSP-0001',namaPekerjaan:'Pekerjaan Pondasi Beton Bertulang',volume:120,satuan:'m³',hargaSatuan:1856250,total:222750000},
-  {id:'RAB-0002',kodeAHSP:'AHSP-0002',namaPekerjaan:'Pasangan Bata Ringan AAC t=10cm',volume:680,satuan:'m²',hargaSatuan:378500,total:257380000},
-  {id:'RAB-0003',kodeAHSP:'AHSP-0003',namaPekerjaan:'Pemasangan Keramik Lantai 60×60',volume:420,satuan:'m²',hargaSatuan:456000,total:191520000},
 ];}
 
-// ══════════════════════════════════════════════════════════════
-// LOAD ALL DATA
-// ══════════════════════════════════════════════════════════════
+// ── LOAD ───────────────────────────────────────────────────────
 async function loadAll(){
-  const isDemo=API_URL==='YOUR_GAS_WEBAPP_URL';
-  if(isDemo){
-    materials=demoMaterials(); upahList=demoUpah();
-    alatList=demoAlat(); ahspList=demoAHSP(); rabList=demoRAB();
-  } else {
+  if(isDemo()){ materials=demoMaterials(); upahList=demoUpah(); alatList=demoAlat(); ahspList=demoAHSP(); }
+  else {
     try {
-      const [rm,ru,ra,rah,rr]=await Promise.all([
-        apiGet('getMaterials',{limit:1000}),apiGet('getUpah'),
-        apiGet('getAlat'),apiGet('getAHSP'),apiGet('getRAB')
+      const [rm,ru,ra,rah]=await Promise.all([
+        QSApi.get('getMaterials',{limit:2000}),QSApi.get('getUpah'),
+        QSApi.get('getAlat'),QSApi.get('getAHSP')
       ]);
-      if(rm.success) materials=rm.data||[];
-      if(ru.success) upahList=ru.data||[];
-      if(ra.success) alatList=ra.data||[];
-      if(rah.success) ahspList=rah.data||[];
-      if(rr.success) rabList=rr.data||[];
-    } catch(e){
-      materials=demoMaterials();upahList=demoUpah();
-      alatList=demoAlat();ahspList=demoAHSP();rabList=demoRAB();
-    }
+      if(rm.success)materials=rm.data||[];
+      if(ru.success)upahList=ru.data||[];
+      if(ra.success)alatList=ra.data||[];
+      if(rah.success)ahspList=rah.data||[];
+    } catch(e){ materials=demoMaterials();upahList=demoUpah();alatList=demoAlat();ahspList=demoAHSP(); }
   }
   renderAHSPList();
-  renderRABTable();
 }
 
-// ══════════════════════════════════════════════════════════════
-// AHSP BUILDER
-// ══════════════════════════════════════════════════════════════
-let itemIdx=0;
-
+// ── BUILDER: ADD ITEM ROW ──────────────────────────────────────
 function addItem(jenis){
   itemIdx++;
   const idx=itemIdx;
   const list=document.getElementById('ahspItemList');
-  const isFirst=list.querySelector('.item-row')===null;
-  if(isFirst) list.innerHTML='';
+  if(list.querySelector('.item-placeholder')) list.innerHTML='';
 
-  // Build options
-  let opts='<option value="">— Pilih —</option>';
-  const src = jenis==='material' ? materials : jenis==='upah' ? upahList : alatList;
-  src.forEach(x=>{ opts+=`<option value="${x.id}" data-harga="${x.harga}" data-satuan="${x.satuan||''}">${x.nama} (${rupiah(x.harga)}/${x.satuan||'unit'})</option>`; });
-
-  const badgeClass = {material:'jenis-mat',upah:'jenis-upah',alat:'jenis-alat'}[jenis];
-  const badgeLabel = {material:'Material',upah:'Upah',alat:'Alat'}[jenis];
+  const src=jenis==='material'?materials:jenis==='upah'?upahList:alatList;
+  const opts=src.map(x=>`<option value="${x.id}" data-harga="${x.harga}" data-satuan="${x.satuan||''}" data-nama="${x.nama.replace(/"/g,'&quot;')}">${x.nama} — ${Fmt.rupiah(x.harga)}/${x.satuan||'unit'}</option>`).join('');
+  const bCls={material:'jenis-mat',upah:'jenis-upah',alat:'jenis-alat'}[jenis];
+  const bLbl={material:'Material',upah:'Upah',alat:'Alat'}[jenis];
 
   const row=document.createElement('div');
-  row.className='item-row';row.id=`item-row-${idx}`;row.dataset.jenis=jenis;
+  row.className='item-row'; row.id=`ir-${idx}`; row.dataset.jenis=jenis;
   row.innerHTML=`
     <div class="item-row-head">
-      <span class="item-jenis-badge ${badgeClass}">${badgeLabel}</span>
-      <button class="item-del" onclick="removeItem(${idx})"><i class="fas fa-times"></i></button>
+      <span class="badge ${bCls}">${bLbl}</span>
+      <button class="ai-del" onclick="removeItem(${idx})"><i class="fas fa-times"></i></button>
     </div>
-    <div class="frow">
+    <div class="frow-2" style="gap:10px">
       <div class="fgroup" style="margin:0">
-        <label class="flabel" style="margin-bottom:5px">Item</label>
-        <select class="fsel" id="item-sel-${idx}" onchange="onItemSelect(${idx})">${opts}</select>
+        <label class="flabel" style="margin-bottom:4px">Item</label>
+        <select class="fsel" id="is-${idx}" onchange="onItemSelect(${idx})" style="font-size:12px">
+          <option value="">— Pilih —</option>${opts}
+        </select>
       </div>
       <div class="fgroup" style="margin:0">
-        <label class="flabel" style="margin-bottom:5px">Koefisien</label>
-        <input type="number" class="finput" id="item-koe-${idx}" placeholder="0.000" step="0.001" oninput="calcItem(${idx})">
+        <label class="flabel" style="margin-bottom:4px">Koefisien</label>
+        <input type="number" step="any" min="0" class="finput" id="ik-${idx}" placeholder="0.000" oninput="calcItem(${idx})" style="font-size:12px">
       </div>
     </div>
-    <div class="item-calc" id="item-calc-${idx}">
-      <span id="ic-koe-${idx}">0</span>
+    <div class="item-calc" id="ic-${idx}">
+      <span id="ic-k-${idx}">0</span>
       <span class="eq">×</span>
-      <span id="ic-harga-${idx}">Rp 0</span>
+      <span id="ic-h-${idx}">Rp 0</span>
       <span class="eq">=</span>
-      <span class="result" id="ic-result-${idx}">Rp 0</span>
+      <span class="result" id="ic-r-${idx}">Rp 0</span>
     </div>`;
   list.appendChild(row);
-  ahspItems.push({idx,jenis,itemId:'',itemNama:'',koefisien:0,hargaSatuan:0,jumlah:0});
+  ahspItems.push({idx,jenis,itemId:'',itemNama:'',koefisien:0,hargaSatuan:0,satuan:'',jumlah:0});
 }
 
 function removeItem(idx){
-  document.getElementById(`item-row-${idx}`)?.remove();
+  document.getElementById(`ir-${idx}`)?.remove();
   ahspItems=ahspItems.filter(x=>x.idx!==idx);
-  calcAHSPTotal();
-  if(!document.querySelector('.item-row')){
-    document.getElementById('ahspItemList').innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;background:var(--card2);border-radius:10px;border:1px dashed var(--border2)"><i class="fas fa-plus-circle" style="display:block;font-size:24px;margin-bottom:8px;opacity:.3"></i>Klik tombol di bawah untuk menambahkan komponen</div>`;
-  }
+  recalcBreakdown();
+  if(!document.querySelector('.item-row')) resetItemList();
+}
+
+function resetItemList(){
+  document.getElementById('ahspItemList').innerHTML=`<div class="item-placeholder"><i class="fas fa-plus-circle"></i>Klik tombol di bawah untuk menambahkan komponen</div>`;
 }
 
 function onItemSelect(idx){
-  const sel=document.getElementById(`item-sel-${idx}`);
+  const sel=document.getElementById(`is-${idx}`);
   const opt=sel.selectedOptions[0];
-  const harga=Number(opt?.dataset.harga||0);
-  const nama=opt?.text||'';
-  document.getElementById(`ic-harga-${idx}`).textContent=rupiah(harga);
-  const item=ahspItems.find(x=>x.idx===idx);
-  if(item){item.itemId=sel.value;item.itemNama=nama;item.hargaSatuan=harga;}
+  const harga=parseFloat(opt?.dataset.harga||0);
+  const nama=opt?.dataset.nama||'';
+  const satuan=opt?.dataset.satuan||'';
+  document.getElementById(`ic-h-${idx}`).textContent=Fmt.rupiah(harga);
+  const it=ahspItems.find(x=>x.idx===idx);
+  if(it){it.itemId=sel.value;it.itemNama=nama;it.hargaSatuan=harga;it.satuan=satuan;}
   calcItem(idx);
 }
 
 function calcItem(idx){
-  const koe=Number(document.getElementById(`item-koe-${idx}`)?.value||0);
-  const item=ahspItems.find(x=>x.idx===idx);
-  if(!item) return;
-  item.koefisien=koe;
-  item.jumlah=koe*item.hargaSatuan;
-  document.getElementById(`ic-koe-${idx}`).textContent=koe;
-  document.getElementById(`ic-result-${idx}`).textContent=rupiah(item.jumlah);
-  calcAHSPTotal();
+  const raw=document.getElementById(`ik-${idx}`)?.value||'0';
+  // Use parseFloat to preserve full decimal precision
+  const koe=parseFloat(raw)||0;
+  const it=ahspItems.find(x=>x.idx===idx);
+  if(!it)return;
+  it.koefisien=koe;
+  it.jumlah=koe*it.hargaSatuan;
+  document.getElementById(`ic-k-${idx}`).textContent=Fmt.dec(koe,6);
+  document.getElementById(`ic-r-${idx}`).textContent=Fmt.rupiah(it.jumlah);
+  recalcBreakdown();
 }
 
-function calcAHSPTotal(){
-  const total=ahspItems.reduce((s,x)=>s+x.jumlah,0);
-  document.getElementById('ahspTotal').textContent=rupiah(total);
+// ── BREAKDOWN CALCULATION ──────────────────────────────────────
+function recalcBreakdown(){
+  const subtotal=ahspItems.reduce((s,x)=>s+x.jumlah,0);
+  const ovPct  =parseFloat(document.getElementById('pctOverhead').value)||0;
+  const feePct =parseFloat(document.getElementById('pctFee').value)||0;
+  const pphPct =parseFloat(document.getElementById('pctPPH').value)||0;
+  const ovAmt  =subtotal*(ovPct/100);
+  const feeAmt =(subtotal+ovAmt)*(feePct/100);
+  const base   =subtotal+ovAmt+feeAmt;
+  const pphAmt =base*(pphPct/100);
+  const grand  =base+pphAmt;
+  document.getElementById('bdSubtotal').textContent=Fmt.rupiah(subtotal);
+  document.getElementById('bdOverhead').textContent='+ '+Fmt.rupiah(ovAmt);
+  document.getElementById('bdFee').textContent='+ '+Fmt.rupiah(feeAmt);
+  document.getElementById('bdPPH').textContent='+ '+Fmt.rupiah(pphAmt);
+  document.getElementById('bdGrand').textContent=Fmt.rupiah(grand);
+  return{subtotal,ovAmt,feeAmt,pphAmt,grand};
 }
 
+// ── SAVE AHSP ──────────────────────────────────────────────────
 async function saveAHSP(){
+  const editId=document.getElementById('ahspEditId').value;
   const nama=document.getElementById('ahspNama').value.trim();
   if(!nama){toast('Nama pekerjaan wajib diisi!','error');return;}
-  const validItems=ahspItems.filter(x=>x.itemId&&x.koefisien>0);
-  if(!validItems.length){toast('Minimal 1 komponen AHSP dengan item dan koefisien!','error');return;}
-
-  const isDemo=API_URL==='YOUR_GAS_WEBAPP_URL';
-  const total=validItems.reduce((s,x)=>s+x.jumlah,0);
-
-  if(isDemo){
-    const id='AHSP-'+String(ahspList.length+1).padStart(4,'0');
-    ahspList.unshift({id,namaPekerjaan:nama,totalAHSP:total,
-      items:validItems.map(x=>({jenis:x.jenis,item:x.itemNama,koefisien:x.koefisien,hargaSatuan:x.hargaSatuan,jumlah:x.jumlah}))});
-    toast('AHSP berhasil disimpan! (Demo Mode)');
-    resetAHSPForm(); renderAHSPList(); buildRABForm(); return;
+  const valid=ahspItems.filter(x=>x.itemId&&x.koefisien>0);
+  if(!valid.length){toast('Minimal 1 komponen dengan item dan koefisien!','error');return;}
+  const bd=recalcBreakdown();
+  const payload={
+    id:editId||undefined,
+    namaPekerjaan:nama,
+    overhead:parseFloat(document.getElementById('pctOverhead').value)||0,
+    contractorFee:parseFloat(document.getElementById('pctFee').value)||0,
+    pph:parseFloat(document.getElementById('pctPPH').value)||0,
+    items:valid.map(x=>({jenis:x.jenis,item:x.itemNama,koefisien:x.koefisien,hargaSatuan:x.hargaSatuan,satuan:x.satuan}))
+  };
+  if(isDemo()){
+    if(editId){
+      const i=ahspList.findIndex(a=>a.id===editId);
+      if(i!==-1)ahspList[i]={...ahspList[i],namaPekerjaan:nama,overhead:payload.overhead,contractorFee:payload.contractorFee,pph:payload.pph,totalAHSP:bd.subtotal,grandTotal:bd.grand,items:payload.items.map(x=>({...x,jumlah:x.koefisien*x.hargaSatuan}))};
+      toast('AHSP diperbarui! (Demo)');
+    } else {
+      const id='AHSP-'+String(ahspList.length+1).padStart(4,'0');
+      ahspList.unshift({id,...payload,totalAHSP:bd.subtotal,grandTotal:bd.grand,items:payload.items.map(x=>({...x,jumlah:x.koefisien*x.hargaSatuan}))});
+      toast('AHSP disimpan! (Demo)');
+    }
+    cancelEditAHSP();renderAHSPList();return;
   }
-
   const btn=document.getElementById('ahspSaveBtn');btn.disabled=true;
-  try {
-    const r=await apiPost({action:'addAHSP',data:{namaPekerjaan:nama,items:validItems}});
-    if(r.success){toast(r.message);resetAHSPForm();await loadAll();}
+  try{
+    const action=editId?'updateAHSP':'addAHSP';
+    if(editId)payload.id=editId;
+    const r=await QSApi.post({action,data:payload});
+    if(r.success){toast(r.message);cancelEditAHSP();await loadAll();}
     else toast(r.message||'Gagal menyimpan!','error');
-  } catch(e){toast('Koneksi error!','error');}
+  }catch(e){toast('Koneksi error!','error');}
   btn.disabled=false;
 }
 
-function resetAHSPForm(){
-  document.getElementById('ahspNama').value='';
-  document.getElementById('ahspItemList').innerHTML=`<div style="padding:20px;text-align:center;color:var(--muted);font-size:12px;background:var(--card2);border-radius:10px;border:1px dashed var(--border2)"><i class="fas fa-plus-circle" style="display:block;font-size:24px;margin-bottom:8px;opacity:.3"></i>Klik tombol di bawah untuk menambahkan komponen</div>`;
-  ahspItems=[];itemIdx=0;
-  document.getElementById('ahspTotal').textContent='Rp 0';
-  document.getElementById('ahspDetailCard').style.display='none';
+// ── EDIT AHSP ──────────────────────────────────────────────────
+function editAHSP(id){
+  const a=ahspList.find(x=>x.id===id);if(!a)return;
+  // Reset form
+  cancelEditAHSP(false);
+  document.getElementById('ahspEditId').value=a.id;
+  document.getElementById('ahspNama').value=a.namaPekerjaan;
+  document.getElementById('pctOverhead').value=a.overhead||0;
+  document.getElementById('pctFee').value=a.contractorFee||0;
+  document.getElementById('pctPPH').value=a.pph||0;
+  // Re-add items
+  a.items.forEach(it=>{
+    addItem(it.jenis);
+    const idx=itemIdx;
+    // Set select value after render
+    setTimeout(()=>{
+      const sel=document.getElementById(`is-${idx}`);
+      // find option by nama
+      const opt=[...sel.options].find(o=>o.dataset.nama===it.item||o.text.startsWith(it.item));
+      if(opt){sel.value=opt.value;onItemSelect(idx);}
+      const kinput=document.getElementById(`ik-${idx}`);
+      if(kinput){kinput.value=it.koefisien;calcItem(idx);}
+    },0);
+  });
+  document.getElementById('builderTitle').textContent='Edit AHSP';
+  document.getElementById('ahspSaveLbl').textContent='UPDATE AHSP';
+  document.getElementById('ahspCancelBtn').style.display='block';
+  document.getElementById('builderCard').scrollIntoView({behavior:'smooth'});
 }
 
-// ── AHSP LIST ─────────────────────────────────────────────────
+function cancelEditAHSP(resetForm=true){
+  if(resetForm){
+    document.getElementById('ahspEditId').value='';
+    document.getElementById('ahspNama').value='';
+    document.getElementById('pctOverhead').value='0';
+    document.getElementById('pctFee').value='0';
+    document.getElementById('pctPPH').value='0';
+    ahspItems=[];itemIdx=0;resetItemList();recalcBreakdown();
+  }
+  document.getElementById('builderTitle').textContent='Input AHSP Baru';
+  document.getElementById('ahspSaveLbl').textContent='SIMPAN AHSP';
+  document.getElementById('ahspCancelBtn').style.display='none';
+}
+
+// ── AHSP LIST ──────────────────────────────────────────────────
+function filterAHSP(){renderAHSPList();}
 function renderAHSPList(){
   const q=(document.getElementById('ahspSearch').value||'').toLowerCase();
   ahspFiltered=ahspList.filter(a=>!q||a.namaPekerjaan.toLowerCase().includes(q)||a.id.toLowerCase().includes(q));
   document.getElementById('ahspCount').textContent=ahspFiltered.length;
   const el=document.getElementById('ahspListBody');
-  if(!ahspFiltered.length){
-    el.innerHTML='<div class="empty-list"><i class="fas fa-inbox"></i><p>Belum ada data AHSP</p></div>'; return;
-  }
+  if(!ahspFiltered.length){el.innerHTML='<div class="empty-state"><i class="fas fa-inbox"></i><p>Belum ada AHSP</p></div>';return;}
+  const canEdit=QSAuth.can('ahsp'),canDel=QSAuth.can('delete');
   el.innerHTML=ahspFiltered.map(a=>{
-    const matC=a.items.filter(x=>x.jenis==='material').length;
-    const upC=a.items.filter(x=>x.jenis==='upah').length;
-    const alC=a.items.filter(x=>x.jenis==='alat').length;
-    return `<div class="ahsp-item-card" onclick="showAHSPDetail('${a.id}')">
-      <div class="aic-head">
-        <span class="aic-id">${a.id}</span>
-        <button class="aic-del" onclick="event.stopPropagation();deleteAHSP('${a.id}','${a.namaPekerjaan.replace(/'/g,"\\'")}')">
-          <i class="fas fa-trash"></i>
-        </button>
-      </div>
-      <div class="aic-nama">${a.namaPekerjaan}</div>
-      <div class="aic-total">${rupiah(a.totalAHSP)} <span style="font-size:10px;color:var(--muted);font-family:var(--fbody)">/ satuan</span></div>
-      <div class="aic-meta" style="margin-top:8px">
-        ${matC?`<span class="aic-badge" style="background:rgba(249,115,22,.1);color:var(--primary)">${matC} material</span>`:''}
-        ${upC?`<span class="aic-badge" style="background:rgba(34,211,238,.1);color:var(--cyan)">${upC} upah</span>`:''}
-        ${alC?`<span class="aic-badge" style="background:rgba(167,139,250,.1);color:var(--purple)">${alC} alat</span>`:''}
+    const mC=a.items.filter(x=>x.jenis==='material').length;
+    const uC=a.items.filter(x=>x.jenis==='upah').length;
+    const aC=a.items.filter(x=>x.jenis==='alat').length;
+    return `<div class="ahsp-item ${selectedAHSP.has(a.id)?'selected':''}" id="ai-${a.id}">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        <input type="checkbox" ${selectedAHSP.has(a.id)?'checked':''} onclick="toggleSelect('${a.id}',event)" title="Pilih untuk export">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:6px">
+            <span class="ai-id">${a.id}</span>
+            <div style="display:flex;gap:4px">
+              <button class="ai-del" onclick="event.stopPropagation();showDetail('${a.id}')" title="Detail" style="background:rgba(249,115,22,.1);color:var(--primary)"><i class="fas fa-eye"></i></button>
+              ${canEdit?`<button class="ai-del" onclick="event.stopPropagation();editAHSP('${a.id}')" title="Edit" style="background:rgba(34,211,238,.1);color:var(--cyan)"><i class="fas fa-pen"></i></button>`:''}
+              ${canDel?`<button class="ai-del" onclick="event.stopPropagation();deleteAHSP('${a.id}','${a.namaPekerjaan.replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i></button>`:''}
+            </div>
+          </div>
+          <div class="ai-name">${a.namaPekerjaan}</div>
+          <div class="ai-total">Subtotal: ${Fmt.rupiah(a.totalAHSP)}</div>
+          <div class="ai-grand">Grand Total: ${Fmt.rupiah(a.grandTotal)}</div>
+          <div class="ai-meta">
+            ${mC?`<span class="badge badge-orange">${mC} material</span>`:''}
+            ${uC?`<span class="badge badge-cyan">${uC} upah</span>`:''}
+            ${aC?`<span class="badge badge-purple">${aC} alat</span>`:''}
+          </div>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
-function filterAHSP(){renderAHSPList();}
+function toggleSelect(id,event){
+  event.stopPropagation();
+  if(selectedAHSP.has(id)) selectedAHSP.delete(id);
+  else selectedAHSP.add(id);
+  renderAHSPList();
+  updateExportButtons();
+}
+function selectAllAHSP(){ahspFiltered.forEach(a=>selectedAHSP.add(a.id));renderAHSPList();updateExportButtons();}
+function deselectAllAHSP(){selectedAHSP.clear();renderAHSPList();updateExportButtons();}
+function updateExportButtons(){
+  const n=selectedAHSP.size;
+  document.getElementById('btnExportXL').textContent=n?`Export Excel (${n})`:'Export Excel';
+  document.getElementById('btnCopyTSV').textContent=n?`Copy TSV (${n})`:'Copy TSV';
+}
 
-function showAHSPDetail(id){
-  const a=ahspList.find(x=>x.id===id); if(!a) return;
-  const card=document.getElementById('ahspDetailCard');
-  card.style.display='block';
-  const rows=a.items.map((item,i)=>`
-    <tr>
-      <td>${i+1}</td>
-      <td><span class="aic-badge ${item.jenis==='material'?'jenis-mat':item.jenis==='upah'?'jenis-upah':'jenis-alat'}" style="display:inline-flex">${item.jenis}</span></td>
-      <td style="color:var(--text)">${item.item}</td>
-      <td class="mono">${item.koefisien}</td>
-      <td class="currency">${rupiah(item.hargaSatuan)}</td>
-      <td class="currency">${rupiah(item.jumlah)}</td>
-    </tr>`).join('');
-  document.getElementById('ahspDetailContent').innerHTML=`
-    <div style="margin-bottom:12px">
-      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">ID</div>
+// ── DETAIL MODAL ───────────────────────────────────────────────
+function showDetail(id){
+  const a=ahspList.find(x=>x.id===id);if(!a)return;
+  const rows=a.items.map((it,i)=>`<tr>
+    <td>${i+1}</td>
+    <td><span class="badge ${it.jenis==='material'?'badge-orange':it.jenis==='upah'?'badge-cyan':'badge-purple'}">${it.jenis}</span></td>
+    <td style="color:var(--text)">${it.item}</td>
+    <td class="mono">${Fmt.dec(it.koefisien,6)}</td>
+    <td class="currency">${Fmt.rupiah(it.hargaSatuan)}</td>
+    <td class="currency">${Fmt.rupiah(it.jumlah)}</td>
+  </tr>`).join('');
+  document.getElementById('detailModalContent').innerHTML=`
+    <div style="margin-bottom:14px">
+      <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">ID AHSP</div>
       <div class="mono" style="font-size:13px;margin-top:3px">${a.id}</div>
     </div>
     <div style="margin-bottom:16px">
       <div style="font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">Nama Pekerjaan</div>
-      <div style="font-size:15px;font-weight:600;margin-top:3px">${a.namaPekerjaan}</div>
+      <div style="font-size:15px;font-weight:600;margin-top:3px;color:var(--text)">${a.namaPekerjaan}</div>
     </div>
-    <div class="tbl-wrap" style="border-radius:8px;overflow:hidden;border:1px solid var(--border)">
+    <div class="tbl-wrap" style="border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;margin-bottom:14px">
       <table class="tbl" style="min-width:0">
-        <thead><tr><th>No</th><th>Jenis</th><th>Item</th><th>Koef.</th><th>Harga Sat.</th><th>Jumlah</th></tr></thead>
+        <thead><tr><th>#</th><th>Jenis</th><th>Item</th><th>Koefisien</th><th>Harga Sat.</th><th>Jumlah</th></tr></thead>
         <tbody>${rows}</tbody>
-        <tfoot><tr style="background:var(--card3)">
-          <td colspan="5" style="font-weight:700;font-size:11px;letter-spacing:1px;color:var(--text)">TOTAL AHSP</td>
-          <td style="font-family:var(--fmono);color:var(--primary);font-weight:700;font-size:14px">${rupiah(a.totalAHSP)}</td>
-        </tr></tfoot>
       </table>
     </div>
-    <button onclick="prefillRABfromAHSP('${a.id}')" style="width:100%;margin-top:12px;padding:10px;background:var(--primary-d);border:1px solid var(--primary-b);border-radius:8px;color:var(--primary);font-size:12px;font-weight:600;cursor:pointer;transition:all .2s" onmouseover="this.style.background='var(--primary)';this.style.color='#fff'" onmouseout="this.style.background='var(--primary-d)';this.style.color='var(--primary)'">
-      <i class="fas fa-file-invoice-dollar"></i> Tambahkan ke RAB →
-    </button>`;
-  card.scrollIntoView({behavior:'smooth'});
+    <div class="breakdown-box">
+      <div class="breakdown-row"><span class="breakdown-label">Subtotal AHSP</span><span class="breakdown-val">${Fmt.rupiah(a.totalAHSP)}</span></div>
+      <div class="breakdown-row"><span class="breakdown-label">Overhead (${a.overhead||0}%)</span><span class="breakdown-val">+ ${Fmt.rupiah(a.totalAHSP*(a.overhead||0)/100)}</span></div>
+      <div class="breakdown-row"><span class="breakdown-label">Contractor Fee (${a.contractorFee||0}%)</span><span class="breakdown-val">+ ${Fmt.rupiah((a.totalAHSP+a.totalAHSP*(a.overhead||0)/100)*(a.contractorFee||0)/100)}</span></div>
+      <div class="breakdown-row"><span class="breakdown-label">Pajak PPH (${a.pph||0}%)</span><span class="breakdown-val">+ ${Fmt.rupiah(a.grandTotal-a.totalAHSP*(1+(a.overhead||0)/100)*(1+(a.contractorFee||0)/100))}</span></div>
+      <div class="breakdown-row total"><span style="color:var(--text)">GRAND TOTAL</span><span style="color:var(--primary);font-size:18px">${Fmt.rupiah(a.grandTotal)}</span></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+      ${QSAuth.can('ahsp')?`<button class="btn btn-cyan btn-sm" onclick="closeDetailModal();editAHSP('${a.id}')"><i class="fas fa-pen"></i> Edit AHSP</button>`:''}
+      <button class="btn btn-secondary btn-sm" onclick="exportSingleExcel('${a.id}')"><i class="fas fa-file-excel"></i> Export Excel</button>
+      <button class="btn btn-secondary btn-sm" onclick="copySingleTSV('${a.id}')"><i class="fas fa-copy"></i> Copy TSV</button>
+    </div>`;
+  document.getElementById('detailModal').classList.add('open');
 }
+function closeDetailModal(){document.getElementById('detailModal').classList.remove('open');}
+document.getElementById('detailModal').addEventListener('click',e=>{if(e.target===document.getElementById('detailModal'))closeDetailModal();});
 
-function prefillRABfromAHSP(id){
-  openTab('rab');
-  setTimeout(()=>{
-    const sel=document.getElementById('rabAhspSel');
-    sel.value=id; onAHSPSelect();
-    document.querySelector('.rab-wrap .form-card').scrollIntoView({behavior:'smooth'});
-  },200);
-}
-
-async function deleteAHSP(id,nama){
+// ── DELETE ──────────────────────────────────────────────────────
+function deleteAHSP(id,nama){
   showConfirm('Hapus AHSP',`Hapus AHSP "${nama}"? Semua komponen akan dihapus.`,async()=>{
-    if(API_URL==='YOUR_GAS_WEBAPP_URL'){
-      ahspList=ahspList.filter(a=>a.id!==id); renderAHSPList(); buildRABForm(); toast('AHSP dihapus (Demo)','info'); return;
-    }
-    try {
-      const r=await apiPost({action:'deleteAHSP',id});
-      if(r.success){toast(r.message);await loadAll();}else toast(r.message,'error');
-    }catch(e){toast('Error','error');}
-  });
-}
-
-// ══════════════════════════════════════════════════════════════
-// RAB
-// ══════════════════════════════════════════════════════════════
-function buildRABForm(){
-  const sel=document.getElementById('rabAhspSel');
-  const cur=sel.value;
-  sel.innerHTML='<option value="">— Pilih Pekerjaan AHSP —</option>'+
-    ahspList.map(a=>`<option value="${a.id}" data-harga="${a.totalAHSP}" data-nama="${a.namaPekerjaan.replace(/"/g,'&quot;')}">${a.id} — ${a.namaPekerjaan}</option>`).join('');
-  if(cur) sel.value=cur;
-}
-
-function onAHSPSelect(){
-  const sel=document.getElementById('rabAhspSel');
-  const opt=sel.selectedOptions[0];
-  const harga=Number(opt?.dataset.harga||0);
-  const nama=opt?.dataset.nama||'';
-  document.getElementById('rabNama').value=nama;
-  document.getElementById('rabHarga').value=harga||'';
-  calcRABTotal();
-}
-
-function calcRABTotal(){
-  const vol=Number(document.getElementById('rabVol').value||0);
-  const harga=Number(document.getElementById('rabHarga').value||0);
-  const total=vol*harga;
-  document.getElementById('rabPrevVol').textContent=vol.toLocaleString('id-ID');
-  document.getElementById('rabPrevHarga').textContent=rupiah(harga);
-  document.getElementById('rabPrevTotal').textContent=rupiah(total);
-}
-
-async function saveRAB(){
-  const ahspId=document.getElementById('rabAhspSel').value;
-  const nama=document.getElementById('rabNama').value.trim();
-  const vol=Number(document.getElementById('rabVol').value||0);
-  const satuan=document.getElementById('rabSatuan').value.trim();
-  const harga=Number(document.getElementById('rabHarga').value||0);
-  if(!ahspId||!nama||!vol||!satuan||!harga){toast('Semua field wajib diisi!','error');return;}
-  const total=vol*harga;
-
-  if(API_URL==='YOUR_GAS_WEBAPP_URL'){
-    const id='RAB-'+String(rabList.length+1).padStart(4,'0');
-    rabList.push({id,kodeAHSP:ahspId,namaPekerjaan:nama,volume:vol,satuan,hargaSatuan:harga,total});
-    toast('Item RAB ditambahkan! (Demo Mode)');
-    document.getElementById('rabVol').value='';document.getElementById('rabSatuan').value='';
-    calcRABTotal(); renderRABTable(); return;
-  }
-  try {
-    const r=await apiPost({action:'addRAB',data:{kodeAHSP:ahspId,namaPekerjaan:nama,volume:vol,satuan,hargaSatuan:harga}});
-    if(r.success){toast(r.message);await loadAll();}else toast(r.message,'error');
-  }catch(e){toast('Koneksi error!','error');}
-}
-
-function renderRABTable(){
-  const q=(document.getElementById('rabSearch')?.value||'').toLowerCase();
-  rabFiltered=rabList.filter(r=>!q||r.namaPekerjaan.toLowerCase().includes(q)||r.kodeAHSP.toLowerCase().includes(q));
-  document.getElementById('rabCount').textContent=`${rabFiltered.length} item`;
-  const grand=rabFiltered.reduce((s,r)=>s+r.total,0);
-  document.getElementById('grandTotal').textContent=rupiah(grand);
-  const tbody=document.getElementById('rabBody');
-  if(!rabFiltered.length){
-    tbody.innerHTML='<tr><td colspan="8"><div style="text-align:center;padding:40px;color:var(--muted);font-size:12px"><i class="fas fa-file-circle-exclamation" style="font-size:32px;display:block;margin-bottom:10px;opacity:.2"></i>Belum ada item RAB</div></td></tr>'; return;
-  }
-  tbody.innerHTML=rabFiltered.map((r,i)=>`
-    <tr>
-      <td class="mono" style="color:var(--muted)">${i+1}</td>
-      <td class="mono" style="color:var(--primary)">${r.kodeAHSP}</td>
-      <td style="color:var(--text);font-weight:500">${r.namaPekerjaan}</td>
-      <td class="mono">${r.volume.toLocaleString('id-ID')}</td>
-      <td class="mono">${r.satuan||'—'}</td>
-      <td class="currency">${rupiah(r.hargaSatuan)}</td>
-      <td class="currency" style="font-size:13px;font-weight:600;color:var(--warning)">${rupiah(r.total)}</td>
-      <td><div class="act-btns">
-        <button class="act-btn del" onclick="deleteRAB('${r.id}','${r.namaPekerjaan.replace(/'/g,"\\'")}')"><i class="fas fa-trash"></i></button>
-      </div></td>
-    </tr>`).join('');
-}
-function filterRAB(){renderRABTable();}
-
-async function deleteRAB(id,nama){
-  showConfirm('Hapus Item RAB',`Hapus "${nama}" dari RAB?`,async()=>{
-    if(API_URL==='YOUR_GAS_WEBAPP_URL'){
-      rabList=rabList.filter(r=>r.id!==id); renderRABTable(); toast('Item RAB dihapus (Demo)','info'); return;
-    }
-    try{const r=await apiPost({action:'deleteRAB',id});if(r.success){toast(r.message);await loadAll();}else toast(r.message,'error');}
+    if(isDemo()){ahspList=ahspList.filter(a=>a.id!==id);selectedAHSP.delete(id);renderAHSPList();toast('AHSP dihapus (Demo)','info');return;}
+    try{const r=await QSApi.post({action:'deleteAHSP',id});if(r.success){toast(r.message);await loadAll();}else toast(r.message,'error');}
     catch(e){toast('Error','error');}
   });
 }
 
-// ── EXPORT RAB CSV ─────────────────────────────────────────────
-function exportRABcsv(){
-  const rows=[['No.','Kode AHSP','Nama Pekerjaan','Volume','Satuan','Harga Satuan','Total'],
-    ...rabList.map((r,i)=>[i+1,r.kodeAHSP,r.namaPekerjaan,r.volume,r.satuan,r.hargaSatuan,r.total]),
-    ['','','','','','Grand Total',rabList.reduce((s,r)=>s+r.total,0)]
-  ];
-  const csv=rows.map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,\uFEFF'+encodeURIComponent(csv);
-  a.download='RAB_Proyek.csv';a.click();
-  toast('Export RAB CSV berhasil!');
+// ── EXPORT FUNCTIONS ─────────────────────────────────────────────
+
+// Build tabular rows from one AHSP item
+function buildAHSPRows(a){
+  const hdrs=['Kode','Nama Pekerjaan','Jenis','Item','Koefisien','Satuan','Harga Satuan','Jumlah'];
+  const rows=a.items.map(it=>[a.id,a.namaPekerjaan,it.jenis,it.item,it.koefisien,it.satuan||'',it.hargaSatuan,it.jumlah]);
+  // Summary rows
+  rows.push(['','','','','','','Subtotal AHSP',a.totalAHSP]);
+  rows.push(['','','','','','',`Overhead (${a.overhead||0}%)`,a.totalAHSP*(a.overhead||0)/100]);
+  rows.push(['','','','','','',`Contractor Fee (${a.contractorFee||0}%)`,''+(a.grandTotal)]);
+  rows.push(['','','','','','','GRAND TOTAL',a.grandTotal]);
+  return{hdrs,rows};
+}
+
+// Export selected AHSP to .xlsx
+function exportSelectedExcel(){
+  const ids=[...selectedAHSP];
+  if(!ids.length){toast('Pilih minimal 1 AHSP dulu!','warning');return;}
+  exportAHSPToExcel(ahspList.filter(a=>ids.includes(a.id)));
+}
+function exportSingleExcel(id){exportAHSPToExcel([ahspList.find(a=>a.id===id)].filter(Boolean));}
+
+function exportAHSPToExcel(items){
+  if(!items.length)return;
+  const wb=XLSX.utils.book_new();
+  items.forEach(a=>{
+    const {hdrs,rows}=buildAHSPRows(a);
+    const ws=XLSX.utils.aoa_to_sheet([hdrs,...rows]);
+    // Column widths
+    ws['!cols']=[{wch:12},{wch:38},{wch:10},{wch:28},{wch:12},{wch:8},{wch:16},{wch:18}];
+    const sheetName=a.id.replace(/[^a-zA-Z0-9-]/g,'').slice(0,31);
+    XLSX.utils.book_append_sheet(wb,ws,sheetName);
+  });
+  XLSX.writeFile(wb,'AHSP_Export_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Excel berhasil diekspor!');
+}
+
+// Copy TSV to clipboard (pastes cleanly into Google Sheets / Excel)
+function copySelectedTSV(){
+  const ids=[...selectedAHSP];
+  if(!ids.length){toast('Pilih minimal 1 AHSP dulu!','warning');return;}
+  copySingleTSV(null,ahspList.filter(a=>ids.includes(a.id)));
+}
+function copySingleTSV(id,items){
+  const data=items||[ahspList.find(a=>a.id===id)].filter(Boolean);
+  if(!data.length)return;
+  const lines=['Kode\tNama Pekerjaan\tJenis\tItem\tKoefisien\tSatuan\tHarga Satuan\tJumlah'];
+  data.forEach(a=>{
+    a.items.forEach(it=>{
+      lines.push([a.id,a.namaPekerjaan,it.jenis,it.item,it.koefisien,it.satuan||'',it.hargaSatuan,it.jumlah].join('\t'));
+    });
+    lines.push(['','','','','','','Subtotal AHSP',a.totalAHSP].join('\t'));
+    lines.push(['','','','','','','GRAND TOTAL',a.grandTotal].join('\t'));
+    lines.push('');
+  });
+  navigator.clipboard.writeText(lines.join('\n'))
+    .then(()=>toast('TSV disalin ke clipboard! Paste ke Google Sheets / Excel.'))
+    .catch(()=>toast('Gagal menyalin — browser tidak mendukung clipboard API','error'));
 }
 
 // ── INIT ──────────────────────────────────────────────────────
-const user=checkAuth();
-if(user){document.getElementById('userName').textContent=user.username||'—';document.getElementById('userRole').textContent=user.role||'—';}
-initHashRouting();
-loadAll();
+const _user=QSAuth.requirePerm('ahsp');
+if(_user){
+  initSidebar('ahsp');
+  // Purchasing cannot access AHSP Builder
+  if(_user.role==='purchasing'){location.href='dashboard.html';}
+  loadAll();
+}
 </script>
 </body>
 </html>
