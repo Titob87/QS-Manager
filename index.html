@@ -1,162 +1,87 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>QS Manager — Login</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-:root {
-  --bg:#090C12; --surface:#0F1219; --card:#161C27; --card2:#1C2333;
-  --primary:#F97316; --primary-d:rgba(249,115,22,.12); --primary-b:rgba(249,115,22,.25);
-  --cyan:#22D3EE; --success:#22C55E; --danger:#EF4444;
-  --text:#E2E8F0; --muted:#64748B; --dim:#94A3B8;
-  --border:#1E2940; --border2:#253044;
-  --fdisp:'Barlow Condensed',sans-serif;
-  --fbody:'DM Sans',sans-serif;
-  --fmono:'JetBrains Mono',monospace;
-}
+:root{--bg:#090C12;--surface:#0E1118;--card:#141B26;--card2:#1A2133;--primary:#F97316;--primary-d:rgba(249,115,22,.1);--primary-b:rgba(249,115,22,.22);--cyan:#22D3EE;--success:#22C55E;--danger:#EF4444;--text:#DDE4EF;--muted:#526070;--dim:#8899AA;--border:#1C2535;--fdisp:'Barlow Condensed',sans-serif;--fbody:'DM Sans',sans-serif;--fmono:'JetBrains Mono',monospace}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:var(--fbody);background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
-
-/* BG texture */
-body::before{content:'';position:fixed;inset:0;
-  background-image:linear-gradient(rgba(249,115,22,.025) 1px,transparent 1px),
-                   linear-gradient(90deg,rgba(249,115,22,.025) 1px,transparent 1px);
-  background-size:60px 60px;pointer-events:none}
-
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(249,115,22,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,.022) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
 .glow{position:fixed;pointer-events:none;border-radius:50%}
-.g1{width:700px;height:700px;background:radial-gradient(circle,rgba(249,115,22,.07) 0%,transparent 65%);top:-250px;left:-250px}
-.g2{width:500px;height:500px;background:radial-gradient(circle,rgba(34,211,238,.05) 0%,transparent 65%);bottom:-150px;right:-150px}
-
-/* Wrapper */
-.wrap{display:flex;width:100%;max-width:1020px;min-height:620px;
-  background:var(--card);border:1px solid var(--border);border-radius:20px;
-  overflow:hidden;box-shadow:0 60px 120px rgba(0,0,0,.6);
-  animation:rise .65s cubic-bezier(.22,1,.36,1) both;position:relative;z-index:1}
-@keyframes rise{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
-
-/* LEFT */
-.left{flex:1;padding:56px 52px;display:flex;flex-direction:column;justify-content:space-between;
-  background:linear-gradient(160deg,#0D1320 0%,#111827 100%);
-  border-right:1px solid var(--border);position:relative;overflow:hidden}
-.left::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--primary),var(--cyan))}
-
-.brand{display:flex;align-items:center;gap:14px}
-.brand-ico{width:50px;height:50px;background:var(--primary);border-radius:14px;
-  display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;
-  box-shadow:0 8px 24px rgba(249,115,22,.4)}
-.brand-nm{font-family:var(--fdisp);font-size:20px;font-weight:800;letter-spacing:2px}
-.brand-sub{font-size:10px;color:var(--muted);letter-spacing:3px;text-transform:uppercase}
-
-.hero h1{font-family:var(--fdisp);font-size:56px;font-weight:800;line-height:1.05;letter-spacing:1px;margin-bottom:18px}
+.g1{width:600px;height:600px;background:radial-gradient(circle,rgba(249,115,22,.07) 0%,transparent 65%);top:-220px;left:-180px}
+.g2{width:400px;height:400px;background:radial-gradient(circle,rgba(34,211,238,.05) 0%,transparent 65%);bottom:-120px;right:-120px}
+.wrap{display:flex;width:100%;max-width:980px;min-height:580px;background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;box-shadow:0 50px 100px rgba(0,0,0,.6);animation:rise .55s cubic-bezier(.22,1,.36,1) both;position:relative;z-index:1}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.left{flex:1;padding:48px;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(155deg,#0B1220 0%,#0F1826 100%);border-right:1px solid var(--border);position:relative;overflow:hidden}
+.left::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary),var(--cyan))}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-ico{width:44px;height:44px;background:var(--primary);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;color:#fff;box-shadow:0 6px 20px rgba(249,115,22,.38);flex-shrink:0}
+.brand-nm{font-family:var(--fdisp);font-size:18px;font-weight:800;letter-spacing:2px}
+.brand-sub{font-size:8.5px;color:var(--muted);letter-spacing:3px;text-transform:uppercase}
+.hero h1{font-family:var(--fdisp);font-size:50px;font-weight:800;line-height:1.05;letter-spacing:1px;margin-bottom:16px}
 .hero h1 em{color:var(--primary);font-style:normal}
-.hero p{color:var(--dim);font-size:14px;line-height:1.75;max-width:330px}
-
-.feats{display:flex;flex-direction:column;gap:14px}
-.feat{display:flex;align-items:center;gap:14px;font-size:13px;color:var(--dim)}
-.feat-ico{width:36px;height:36px;background:var(--primary-d);border:1px solid var(--primary-b);
-  border-radius:10px;display:flex;align-items:center;justify-content:center;
-  color:var(--primary);font-size:14px;flex-shrink:0}
-.deco{position:absolute;bottom:-40px;right:-40px;font-size:220px;
-  color:rgba(249,115,22,.03);line-height:1;pointer-events:none}
-
-/* RIGHT */
-.right{width:420px;padding:56px 50px;display:flex;flex-direction:column;justify-content:center}
-.rtitle{font-family:var(--fdisp);font-size:34px;font-weight:700;letter-spacing:.5px;margin-bottom:6px}
-.rsub{color:var(--muted);font-size:13px;margin-bottom:36px}
-
-.fgroup{margin-bottom:20px}
-.flabel{display:block;font-size:11px;font-weight:600;color:var(--dim);
-  text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
-.finput{width:100%;padding:14px 16px;background:var(--card2);border:1px solid var(--border);
-  border-radius:11px;color:var(--text);font-family:var(--fbody);font-size:14px;outline:none;transition:all .2s}
-.finput:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-d)}
+.hero p{color:var(--dim);font-size:13.5px;line-height:1.75;max-width:320px}
+.feats{display:flex;flex-direction:column;gap:11px}
+.feat{display:flex;align-items:center;gap:12px;font-size:12.5px;color:var(--dim)}
+.feat-ico{width:32px;height:32px;background:var(--primary-d);border:1px solid var(--primary-b);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:12px;flex-shrink:0}
+.deco{position:absolute;bottom:-40px;right:-30px;font-size:180px;color:rgba(249,115,22,.028);line-height:1;pointer-events:none}
+.right{width:400px;padding:48px 44px;display:flex;flex-direction:column;justify-content:center}
+.rtitle{font-family:var(--fdisp);font-size:30px;font-weight:700;margin-bottom:5px}
+.rsub{color:var(--muted);font-size:12.5px;margin-bottom:28px}
+.fgroup{margin-bottom:15px}
+.flabel{display:block;font-size:9.5px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+.finput{width:100%;padding:11px 14px;background:var(--card2);border:1px solid var(--border);border-radius:9px;color:var(--text);font-family:var(--fbody);font-size:13.5px;outline:none;transition:all .18s}
+.finput:focus{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-d)}
 .finput::placeholder{color:var(--muted)}
-.igrp{position:relative}
-.igrp .finput{padding-right:46px}
-.toggle-eye{position:absolute;right:16px;top:50%;transform:translateY(-50%);
-  color:var(--muted);cursor:pointer;font-size:14px;transition:color .2s}
-.toggle-eye:hover{color:var(--dim)}
-
-.btn-login{width:100%;padding:15px;background:var(--primary);color:#fff;border:none;
-  border-radius:11px;font-family:var(--fdisp);font-size:17px;font-weight:700;
-  letter-spacing:1px;cursor:pointer;transition:all .2s;margin-top:4px;
-  display:flex;align-items:center;justify-content:center;gap:10px}
-.btn-login:hover:not(:disabled){background:#ea6d10;transform:translateY(-2px);
-  box-shadow:0 10px 28px rgba(249,115,22,.35)}
-.btn-login:active{transform:translateY(0)}
-.btn-login:disabled{opacity:.55;cursor:not-allowed;transform:none}
-
-.msg{border-radius:10px;padding:12px 16px;font-size:13px;margin-bottom:16px;
-  display:none;align-items:center;gap:10px}
-.msg.error{display:flex;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);color:#FCA5A5}
-.msg.success{display:flex;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.25);color:#86EFAC}
-
-.hint{margin-top:24px;padding:16px;background:rgba(249,115,22,.04);
-  border:1px solid rgba(249,115,22,.1);border-radius:12px}
-.hint-title{font-family:var(--fdisp);font-size:12px;color:var(--primary);
-  letter-spacing:2px;margin-bottom:10px;text-transform:uppercase}
-.hrow{display:flex;justify-content:space-between;font-size:12px;
-  color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border)}
+.igrp{position:relative}.igrp .finput{padding-right:42px}
+.eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:13px;transition:color .18s}
+.eye-btn:hover{color:var(--dim)}
+.btn-login{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:9px;font-family:var(--fdisp);font-size:16px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:all .18s;display:flex;align-items:center;justify-content:center;gap:9px;margin-top:4px}
+.btn-login:hover:not(:disabled){background:#ea6d10;transform:translateY(-1px);box-shadow:0 8px 24px rgba(249,115,22,.32)}
+.btn-login:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.msg{border-radius:9px;padding:10px 14px;font-size:12.5px;margin-bottom:13px;display:none;align-items:center;gap:9px}
+.msg.error{display:flex;background:rgba(239,68,68,.09);border:1px solid rgba(239,68,68,.22);color:#FCA5A5}
+.msg.success{display:flex;background:rgba(34,197,94,.09);border:1px solid rgba(34,197,94,.22);color:#86EFAC}
+.hint{margin-top:20px;padding:13px 15px;background:rgba(249,115,22,.04);border:1px solid rgba(249,115,22,.1);border-radius:10px}
+.hint-title{font-family:var(--fdisp);font-size:10px;color:var(--primary);letter-spacing:2px;margin-bottom:8px;text-transform:uppercase;font-weight:700}
+.hrow{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border)}
 .hrow:last-child{border:none}
-.hrow code{font-family:var(--fmono);color:var(--dim);font-size:11px;
-  background:var(--card2);padding:2px 6px;border-radius:4px}
-
-.spin{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);
-  border-top-color:#fff;border-radius:50%;animation:rot .6s linear infinite}
+.hrow code{font-family:var(--fmono);color:var(--dim);font-size:10px;background:var(--card2);padding:2px 6px;border-radius:4px}
+.spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:rot .6s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
-
-@media(max-width:800px){
-  .wrap{flex-direction:column;max-width:420px;margin:16px;min-height:auto}
-  .left{padding:32px;border-right:none;border-bottom:1px solid var(--border)}
-  .hero h1{font-size:40px}.deco{display:none}
-  .right{width:100%;padding:32px}
-}
+.session-banner{background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.18);border-radius:9px;padding:10px 14px;font-size:12px;color:var(--warning);display:flex;align-items:center;gap:8px;margin-bottom:14px;display:none}
+.session-banner.show{display:flex}
+@media(max-width:780px){.wrap{flex-direction:column;max-width:400px;margin:14px;min-height:auto}.left{padding:28px;border-right:none;border-bottom:1px solid var(--border)}.hero h1{font-size:36px}.deco{display:none}.right{width:100%;padding:28px}}
 </style>
 </head>
 <body>
-<div class="glow g1"></div>
-<div class="glow g2"></div>
-
+<div class="glow g1"></div><div class="glow g2"></div>
 <div class="wrap">
-  <!-- LEFT PANEL -->
   <div class="left">
     <div class="brand">
       <div class="brand-ico"><i class="fas fa-hard-hat"></i></div>
-      <div>
-        <div class="brand-nm">QS MANAGER</div>
-        <div class="brand-sub">Construction System</div>
-      </div>
+      <div><div class="brand-nm">QS MANAGER</div><div class="brand-sub">Construction System v3</div></div>
     </div>
-
     <div class="hero">
       <h1>ESTIMASI<br>PROYEK<br><em>PRESISI</em></h1>
-      <p>Platform manajemen database material, AHSP, dan RAB terpadu berbasis Google Ecosystem untuk Quantity Surveyor profesional.</p>
+      <p>Platform manajemen database material, vendor, AHSP, dan analisa harga terpadu untuk Quantity Surveyor profesional.</p>
     </div>
-
     <div class="feats">
-      <div class="feat"><div class="feat-ico"><i class="fas fa-database"></i></div><span>Database Material & Harga Vendor Terpusat</span></div>
-      <div class="feat"><div class="feat-ico"><i class="fas fa-calculator"></i></div><span>AHSP & RAB Otomatis Real-time</span></div>
-      <div class="feat"><div class="feat-ico"><i class="fas fa-chart-bar"></i></div><span>Dashboard Monitoring & Rekap Biaya</span></div>
-      <div class="feat"><div class="feat-ico"><i class="fas fa-cloud"></i></div><span>Cloud-based Google Spreadsheet</span></div>
+      <div class="feat"><div class="feat-ico"><i class="fas fa-database"></i></div><span>Database Material & Vendor Terpusat</span></div>
+      <div class="feat"><div class="feat-ico"><i class="fas fa-chart-column"></i></div><span>Analisa & Perbandingan Harga Real-time</span></div>
+      <div class="feat"><div class="feat-ico"><i class="fas fa-calculator"></i></div><span>AHSP Builder + Export Excel/PDF</span></div>
+      <div class="feat"><div class="feat-ico"><i class="fas fa-shield-halved"></i></div><span>Role-based Access Control (RBAC)</span></div>
     </div>
-
     <div class="deco">🏗</div>
   </div>
-
-  <!-- RIGHT PANEL -->
   <div class="right">
     <h2 class="rtitle">Masuk ke Sistem</h2>
-    <p class="rsub">Masukkan kredensial Anda untuk melanjutkan</p>
-
-    <div class="msg" id="msg">
-      <i class="fas fa-exclamation-circle"></i>
-      <span id="msgText"></span>
-    </div>
-
+    <p class="rsub">Masukkan kredensial untuk melanjutkan</p>
+    <div class="session-banner" id="sessionBanner"><i class="fas fa-clock"></i> Sesi Anda berakhir. Silakan login kembali.</div>
+    <div class="msg" id="msg"><i class="fas fa-exclamation-circle"></i><span id="msgText"></span></div>
     <div class="fgroup">
       <label class="flabel">Username</label>
       <input id="uname" type="text" class="finput" placeholder="Masukkan username" autocomplete="username">
@@ -165,14 +90,10 @@ body::before{content:'';position:fixed;inset:0;
       <label class="flabel">Password</label>
       <div class="igrp">
         <input id="pass" type="password" class="finput" placeholder="Masukkan password" autocomplete="current-password">
-        <span class="toggle-eye" onclick="togglePass()"><i id="eyeIco" class="fas fa-eye"></i></span>
+        <button class="eye-btn" onclick="togglePass()"><i id="eyeIco" class="fas fa-eye"></i></button>
       </div>
     </div>
-
-    <button class="btn-login" id="loginBtn" onclick="doLogin()">
-      <i class="fas fa-sign-in-alt"></i> MASUK
-    </button>
-
+    <button class="btn-login" id="loginBtn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> MASUK</button>
     <div class="hint">
       <div class="hint-title">Default Credentials</div>
       <div class="hrow"><span>Admin</span><code>admin / admin123</code></div>
@@ -181,78 +102,56 @@ body::before{content:'';position:fixed;inset:0;
     </div>
   </div>
 </div>
-
 <script>
-// ── CONFIG ─────────────────────────────────────────────────
-const API_URL = 'https://script.google.com/macros/s/AKfycbwazl0w0bpFCwPqtJYdhuNlvtsvz_xYUYD8rFm8W9SfV6nkfgtFfQ9506SDYN3EObM/exec'; // ← Ganti dengan URL deployment GAS Anda
-
-const DEMO_USERS = {
-  admin:      { password: 'admin123',      role: 'admin' },
-  qs:         { password: 'qs123',         role: 'qs' },
-  purchasing: { password: 'purchasing123', role: 'purchasing' }
+const API_URL='YOUR_GAS_WEBAPP_URL';
+const SESSION_KEY='qs_session';
+const SESSION_TTL=8*60*60*1000;
+const DEMO={
+  admin:{password:'admin123',role:'admin',fullName:'Administrator'},
+  qs:{password:'qs123',role:'qs',fullName:'Quantity Surveyor'},
+  purchasing:{password:'purchasing123',role:'purchasing',fullName:'Purchasing Manager'}
 };
+const ROLE_HOME={admin:'dashboard.html',qs:'dashboard.html',purchasing:'dashboard.html'};
 
-// ── LOGIN ───────────────────────────────────────────────────
-async function doLogin() {
-  const username = document.getElementById('uname').value.trim();
-  const password = document.getElementById('pass').value.trim();
+// Check if redirected due to session timeout
+if(new URLSearchParams(location.search).get('timeout')==='1') document.getElementById('sessionBanner').classList.add('show');
 
-  if (!username || !password) { showMsg('Username dan password wajib diisi!', 'error'); return; }
-
+async function doLogin(){
+  const u=document.getElementById('uname').value.trim();
+  const p=document.getElementById('pass').value;
+  if(!u||!p){showMsg('Username dan password wajib diisi!','error');return;}
   setBusy(true);
-
-  let user = null;
-
-  // 1. Demo / local credentials
-  if (DEMO_USERS[username]?.password === password) {
-    user = { username, role: DEMO_USERS[username].role };
+  let user=null;
+  // Demo auth
+  if(DEMO[u]?.password===p) user={username:u,role:DEMO[u].role,fullName:DEMO[u].fullName};
+  // GAS auth
+  if(!user&&API_URL!=='YOUR_GAS_WEBAPP_URL'){
+    try{
+      const r=await fetch(`${API_URL}?action=login&username=${encodeURIComponent(u)}&password=${encodeURIComponent(p)}`);
+      const d=await r.json();
+      if(d.success) user=d.user;
+    }catch(e){}
   }
-
-  // 2. GAS API (jika URL sudah dikonfigurasi)
-  if (!user && API_URL !== 'YOUR_GAS_WEBAPP_URL') {
-    try {
-      const r = await fetch(`${API_URL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`);
-      const d = await r.json();
-      if (d.success) user = d.user;
-    } catch (e) { /* fallback ke demo */ }
-  }
-
-  if (user) {
-    sessionStorage.setItem('user', JSON.stringify(user));
-    sessionStorage.setItem('loggedIn', '1');
-    showMsg('Login berhasil! Mengalihkan…', 'success');
-    setTimeout(() => location.href = 'dashboard.html', 900);
+  if(user){
+    const sess={user,ts:Date.now()};
+    sessionStorage.setItem(SESSION_KEY,JSON.stringify(sess));
+    showMsg('Login berhasil! Mengalihkan…','success');
+    setTimeout(()=>location.href=ROLE_HOME[user.role]||'dashboard.html',800);
   } else {
-    showMsg('Username atau password salah!', 'error');
-    setBusy(false);
+    showMsg('Username atau password salah!','error');setBusy(false);
   }
 }
 
-function showMsg(text, type) {
-  const el = document.getElementById('msg');
-  document.getElementById('msgText').textContent = text;
-  el.className = `msg ${type}`;
-}
+function showMsg(t,type){const el=document.getElementById('msg');document.getElementById('msgText').textContent=t;el.className=`msg ${type}`;}
+function setBusy(v){const b=document.getElementById('loginBtn');b.disabled=v;b.innerHTML=v?'<div class="spin"></div>&nbsp; Memverifikasi…':'<i class="fas fa-sign-in-alt"></i> MASUK';}
+function togglePass(){const p=document.getElementById('pass'),i=document.getElementById('eyeIco');p.type=p.type==='password'?'text':'password';i.className=p.type==='password'?'fas fa-eye':'fas fa-eye-slash';}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
 
-function setBusy(v) {
-  const btn = document.getElementById('loginBtn');
-  btn.disabled = v;
-  btn.innerHTML = v
-    ? '<div class="spin"></div> Memverifikasi…'
-    : '<i class="fas fa-sign-in-alt"></i> MASUK';
-}
-
-function togglePass() {
-  const p = document.getElementById('pass');
-  const i = document.getElementById('eyeIco');
-  p.type = p.type === 'password' ? 'text' : 'password';
-  i.className = p.type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
-}
-
-document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
-
-// Redirect if already logged in
-if (sessionStorage.getItem('loggedIn') === '1') location.href = 'dashboard.html';
+// Auto-redirect if already logged in with valid session
+try{
+  const raw=sessionStorage.getItem(SESSION_KEY);
+  if(raw){const s=JSON.parse(raw);if(Date.now()-s.ts<SESSION_TTL) location.href=ROLE_HOME[s.user?.role]||'dashboard.html';}
+}catch(e){}
 </script>
 </body>
 </html>
