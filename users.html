@@ -206,26 +206,58 @@ button{font-family:var(--fbody)}
   <div class="content">
     <div class="section-title"><i class="fas fa-shield-halved"></i> Role & Permissions</div>
     <div class="perm-grid" style="margin-bottom:24px">
+
+      <!-- ADMIN -->
       <div class="perm-card">
         <div class="perm-title"><span class="badge badge-red">ADMIN</span> Full Access</div>
         <div class="perm-list">
-          ${['Dashboard','Material','Upah','Alat','Vendor','Analisa Harga','AHSP Builder','User Management','Export & Print','Hapus Data'].map(p=>`<div class="perm-item has"><i class="fas fa-check"></i> ${p}</div>`).join('')}
+          <div class="perm-item has"><i class="fas fa-check"></i> Dashboard</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Material (CRUD)</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Upah & Alat (CRUD)</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Vendor (CRUD)</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Analisa Harga</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> AHSP Builder</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> User Management</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Export CSV / Excel</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Export & Print PDF</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Hapus Semua Data</div>
         </div>
       </div>
+
+      <!-- QS -->
       <div class="perm-card">
         <div class="perm-title"><span class="badge badge-cyan">QS</span> Quantity Surveyor</div>
         <div class="perm-list">
-          ${['Dashboard','Material','Upah','Alat','AHSP Builder','Export Data'].map(p=>`<div class="perm-item has"><i class="fas fa-check"></i> ${p}</div>`).join('')}
-          ${['Vendor','Analisa Harga','User Management','Hapus Data'].map(p=>`<div class="perm-item no"><i class="fas fa-times"></i> ${p}</div>`).join('')}
+          <div class="perm-item has"><i class="fas fa-check"></i> Dashboard</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Material (Add / Edit)</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Upah & Alat (Add / Edit)</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> AHSP Builder</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Export CSV / Excel</div>
+          <div class="perm-item no"><i class="fas fa-times"></i> Vendor Management</div>
+          <div class="perm-item no"><i class="fas fa-times"></i> Analisa Harga</div>
+          <div class="perm-item no"><i class="fas fa-times"></i> User Management</div>
+          <div class="perm-item no"><i class="fas fa-times"></i> Hapus Data</div>
+          <div class="perm-item no"><i class="fas fa-times"></i> Print PDF</div>
         </div>
       </div>
+
+      <!-- PURCHASING -->
       <div class="perm-card">
         <div class="perm-title"><span class="badge badge-purple">PURCHASING</span> Purchasing</div>
         <div class="perm-list">
-          ${['Dashboard','Material (Read)','Vendor','Analisa Harga','Export & Print PDF'].map(p=>`<div class="perm-item has"><i class="fas fa-check"></i> ${p}</div>`).join('')}
-          ${['Upah','Alat','AHSP Builder','User Management','Hapus Data'].map(p=>`<div class="perm-item no"><i class="fas fa-times"></i> ${p}</div>`).join('')}
+          <div class="perm-item has"><i class="fas fa-check"></i> Dashboard</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Material (Read Only)</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Vendor (Add / Edit)</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Analisa Harga</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Export CSV</div>
+          <div class="perm-item has"><i class="fas fa-check"></i> Print PDF Analisa Harga</div>
+          <div class="perm-item no"><i class="fas fa-times"></i> Upah & Alat</div>
+          <div class="perm-item no"><i class="fas fa-times"></i> AHSP Builder</div>
+          <div class="perm-item no"><i class="fas fa-times"></i> User Management</div>
+          <div class="perm-item no"><i class="fas fa-times"></i> Hapus Data</div>
         </div>
       </div>
+
     </div>
 
     <div class="section-title"><i class="fas fa-users"></i> Daftar Pengguna</div>
@@ -294,7 +326,7 @@ button{font-family:var(--fbody)}
    ============================================================ */
 
 // ── CONFIG ───────────────────────────────────────────────────
-const API_URL = 'https://script.google.com/macros/s/AKfycbyOVdHxxJGvlYVYqlIr-2m_3-iNeNmRMSQ8oNkfQ8StG58QR-lI9cL8-WnPA1bkIMV1/exec';
+const API_URL = 'YOUR_GAS_WEBAPP_URL';
 
 // ── RBAC ─────────────────────────────────────────────────────
 const ROLE_PERMS = {
