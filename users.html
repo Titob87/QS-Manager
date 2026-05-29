@@ -233,6 +233,13 @@ button{font-family:var(--fbody)}
       <!-- FORM -->
       <div class="form-card" id="userFormCard" style="position:sticky;top:62px">
         <div class="fc-title"><i class="fas fa-user-plus"></i> <span id="userFormTitle">Tambah User</span></div>
+
+        <!-- INFO BANNER -->
+        <div style="background:rgba(34,211,238,.07);border:1px solid rgba(34,211,238,.18);border-radius:var(--r-md);padding:10px 13px;margin-bottom:14px;font-size:11.5px;color:var(--cyan);display:flex;align-items:flex-start;gap:9px">
+          <i class="fas fa-circle-info" style="margin-top:1px;flex-shrink:0"></i>
+          <span>User yang ditambahkan <strong>langsung bisa login</strong> setelah disimpan. Password disimpan secara lokal dan ke Spreadsheet (jika GAS terhubung).</span>
+        </div>
+
         <input type="hidden" id="userEditId">
         <div class="fgroup"><label class="flabel">Username <span class="req">*</span></label><input id="uUsername" class="finput" placeholder="username unik" autocomplete="off"></div>
         <div class="fgroup"><label class="flabel">Full Name</label><input id="uFullName" class="finput" placeholder="Nama lengkap"></div>
@@ -287,7 +294,7 @@ button{font-family:var(--fbody)}
    ============================================================ */
 
 // ── CONFIG ───────────────────────────────────────────────────
-const API_URL = 'https://script.google.com/macros/s/AKfycbwwxSHe-Ng1KZKLXMJ4qL84V7RfMrNa1OkcGJpEFnXCpQ0a0_-s-ihhDu4yxG9HrNoB/exec';
+const API_URL = 'YOUR_GAS_WEBAPP_URL';
 
 // ── RBAC ─────────────────────────────────────────────────────
 const ROLE_PERMS = {
@@ -493,9 +500,24 @@ function skeletonRows(cols, count = 5) {
   return Array(count).fill(`<tr>${cell.repeat(cols)}</tr>`).join('');
 }
 
+// ── LOCAL CACHE (mirrors index.html's qs_user_cache) ─────────
+const USER_CACHE_KEY = 'qs_user_cache';
+function loadUserCache(){ try{ return JSON.parse(localStorage.getItem(USER_CACHE_KEY)||'[]'); }catch(e){ return []; } }
+function saveToCache(u){
+  // Never cache built-in users to avoid password override
+  const BUILTIN=['admin','qs','purchasing'];
+  if(BUILTIN.includes(u.username)) return;
+  const cache=loadUserCache().filter(x=>x.username!==u.username);
+  // Only store if password was explicitly set (non-empty)
+  if(u._newPassword) cache.push({username:u.username,password:u._newPassword,role:u.role||'qs',fullName:u.fullName||'',status:u.status||'aktif'});
+  localStorage.setItem(USER_CACHE_KEY, JSON.stringify(cache));
+}
+function removeFromCache(username){
+  const cache=loadUserCache().filter(x=>x.username!==username);
+  localStorage.setItem(USER_CACHE_KEY, JSON.stringify(cache));
+}
 let users=[], usersFiltered=[];
 const isDemo=()=>API_URL==='YOUR_GAS_WEBAPP_URL';
-const DEMO_USERS=[
   {id:'USR-0001',username:'admin',fullName:'Administrator',role:'admin',status:'aktif',created:'01/01/2025'},
   {id:'USR-0002',username:'qs',fullName:'Quantity Surveyor',role:'qs',status:'aktif',created:'01/01/2025'},
   {id:'USR-0003',username:'purchasing',fullName:'Purchasing Manager',role:'purchasing',status:'aktif',created:'01/01/2025'},
@@ -537,25 +559,43 @@ function renderUsers(){
 
 async function saveUser(){
   const id=document.getElementById('userEditId').value;
-  const data={
-    id,
-    username:document.getElementById('uUsername').value.trim(),
-    fullName:document.getElementById('uFullName').value.trim(),
-    password:document.getElementById('uPassword').value,
-    role:document.getElementById('uRole').value,
-    status:document.getElementById('uStatus').value
-  };
-  if(!data.username){toast('Username wajib diisi!','error');return;}
-  if(!id&&!data.password){toast('Password wajib diisi untuk user baru!','error');return;}
+  const username=document.getElementById('uUsername').value.trim();
+  const fullName=document.getElementById('uFullName').value.trim();
+  const password=document.getElementById('uPassword').value; // may be empty for updates
+  const role=document.getElementById('uRole').value;
+  const status=document.getElementById('uStatus').value;
+
+  if(!username){toast('Username wajib diisi!','error');return;}
+  if(!id&&!password){toast('Password wajib diisi untuk user baru!','error');return;}
+
+  const data={id,username,fullName,password,role,status};
+
+  // ── Write to localStorage cache so login works immediately ──
+  const cacheEntry={username,role,fullName,status,_newPassword:password||null};
+
   if(isDemo()){
-    if(id){const i=users.findIndex(u=>u.id===id);if(i!==-1)users[i]={...users[i],...data,password:undefined};}
-    else{data.id='USR-'+String(users.length+1).padStart(4,'0');users.push(data);}
-    cancelEditUser();filterUsers();toast(id?'User diperbarui!':'User ditambahkan!');return;
+    if(id){
+      const i=users.findIndex(u=>u.id===id);
+      if(i!==-1) users[i]={...users[i],username,fullName,role,status};
+    } else {
+      const newId='USR-'+String(users.length+1).padStart(4,'0');
+      users.push({id:newId,username,fullName,role,status,created:new Date().toLocaleDateString('id-ID')});
+    }
+    if(password) saveToCache(cacheEntry);
+    cancelEditUser();filterUsers();
+    toast(id?'User diperbarui! Login dengan password baru sudah aktif.':'User ditambahkan! User dapat login sekarang.');
+    return;
   }
+
   const btn=document.getElementById('userSaveBtn');btn.disabled=true;
   try{
     const r=await QSApi.post({action:id?'updateUser':'addUser',data});
-    if(r.success){toast(r.message);cancelEditUser();await loadUsers();}else toast(r.message,'error');
+    if(r.success){
+      if(password) saveToCache(cacheEntry); // cache password for immediate login
+      toast(r.message+' — Login sudah aktif.');
+      cancelEditUser();
+      await loadUsers();
+    } else toast(r.message,'error');
   }catch(e){toast('Koneksi error!','error');}
   btn.disabled=false;
 }
@@ -585,6 +625,7 @@ function cancelEditUser(){
 
 function deleteUser(id,username){
   showConfirm('Hapus User',`Hapus user "${username}"? Mereka tidak dapat login lagi.`,async()=>{
+    removeFromCache(username); // remove from local login cache immediately
     if(isDemo()){users=users.filter(u=>u.id!==id);filterUsers();toast('User dihapus','info');return;}
     try{const r=await QSApi.post({action:'deleteUser',id});if(r.success){toast(r.message);await loadUsers();}else toast(r.message,'error');}
     catch(e){toast('Error','error');}
