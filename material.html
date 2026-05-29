@@ -189,6 +189,30 @@ button{font-family:var(--fbody)}
 }
 @media(max-width:500px){.stats-grid{grid-template-columns:1fr}.content{padding:13px}.topbar{padding:0 13px}}
 
+/* ── VENDOR SEARCHABLE DROPDOWN ────────────────────────────── */
+.vnd-wrap{position:relative;width:100%}
+.vnd-input-row{display:flex;align-items:center}
+.vnd-search{flex:1;padding:9px 12px;background:var(--card2);border:1px solid var(--border);border-radius:var(--r-md) 0 0 var(--r-md);color:var(--text);font-family:var(--fbody);font-size:13px;outline:none;transition:border-color .18s;min-width:0}
+.vnd-search:focus{border-color:var(--primary);box-shadow:0 0 0 2px var(--primary-d)}
+.vnd-search::placeholder{color:var(--muted)}
+.vnd-caret{height:38px;padding:0 10px;background:var(--card2);border:1px solid var(--border);border-left:none;border-radius:0 var(--r-md) var(--r-md) 0;color:var(--muted);cursor:pointer;font-size:11px;transition:all .18s;display:flex;align-items:center}
+.vnd-caret:hover{color:var(--text);background:var(--card3)}
+.vnd-caret.has-val{color:var(--danger)}.vnd-caret.has-val:hover{color:var(--danger)}
+.vnd-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card2);border:1px solid var(--primary-b);border-radius:var(--r-md);z-index:600;max-height:230px;overflow-y:auto;box-shadow:0 10px 32px rgba(0,0,0,.55);display:none;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+.vnd-dropdown.open{display:block}
+.vnd-opt{padding:8px 12px;font-size:12.5px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:9px;transition:background .12s}
+.vnd-opt:last-child{border:none}
+.vnd-opt:hover,.vnd-opt.kbd-focus{background:var(--primary-d);color:var(--text)}
+.vnd-opt.is-selected{background:var(--primary-d);color:var(--primary)}
+.vnd-opt-ico{width:26px;height:26px;background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.12);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--cyan);flex-shrink:0}
+.vnd-opt-body{flex:1;min-width:0}
+.vnd-opt-name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.vnd-opt-meta{font-size:10px;color:var(--muted);margin-top:1px}
+.vnd-empty{padding:14px 12px;text-align:center;color:var(--muted);font-size:12px}
+.vnd-empty i{display:block;font-size:22px;margin-bottom:6px;opacity:.25}
+.vnd-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.18);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--cyan);margin-top:6px;max-width:100%}
+.vnd-badge i{font-size:9px}
+.vnd-badge strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 /* ── ANALISA SPECIFIC ─────────────────────────────────────── */
 .analisa-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
 .analisa-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px}
@@ -247,7 +271,24 @@ button{font-family:var(--fbody)}
             <div class="fgroup"><label class="flabel">Harga (Rp) <span class="req">*</span></label><input id="matHarga" type="number" step="any" min="0" class="finput" placeholder="0"></div>
             <div class="fgroup"><label class="flabel">Satuan <span class="req">*</span></label><input id="matSatuan" list="satList" class="finput" placeholder="kg, m²…"><datalist id="satList"><option value="kg"><option value="m²"><option value="m³"><option value="m'"><option value="bh"><option value="lbr"><option value="sak"><option value="set"><option value="ls"><option value="unit"><option value="ton"><option value="btg"><option value="OH"></datalist></div>
           </div>
-          <div class="fgroup"><label class="flabel">Vendor</label><input id="matVendor" list="vendorList" class="finput" placeholder="Nama vendor"><datalist id="vendorList"></datalist></div>
+          <div class="fgroup">
+            <label class="flabel">Vendor / Supplier</label>
+            <div class="vnd-wrap" id="matVendorWrap">
+              <div class="vnd-input-row">
+                <input type="text" class="vnd-search" id="matVendorSearch" placeholder="Ketik nama vendor…" autocomplete="off"
+                  oninput="vndFilter('mat')" onfocus="vndOpen('mat')" onkeydown="vndKey(event,'mat')">
+                <button type="button" class="vnd-caret" id="matVendorCaret"
+                  onclick="document.getElementById('matVendor').value?vndClear('mat'):vndToggle('mat')" tabindex="-1">
+                  <i class="fas fa-chevron-down" id="matVendorCaretIco"></i>
+                </button>
+              </div>
+              <div class="vnd-badge" id="matVendorBadge" style="display:none">
+                <i class="fas fa-store"></i><strong id="matVendorBadgeTxt">—</strong>
+              </div>
+              <div class="vnd-dropdown" id="matVendorDrop"></div>
+            </div>
+            <input type="hidden" id="matVendor">
+          </div>
           <button class="btn btn-primary btn-full" id="matSaveBtn" onclick="saveMaterial()"><i class="fas fa-save"></i> <span id="matSaveLbl">SIMPAN MATERIAL</span></button>
           <button class="btn btn-secondary btn-full" id="matCancelBtn" onclick="cancelEditMaterial()" style="margin-top:7px;display:none"><i class="fas fa-times"></i> Batal Edit</button>
         </div>
@@ -314,7 +355,24 @@ button{font-family:var(--fbody)}
             <div class="fgroup"><label class="flabel">Satuan <span class="req">*</span></label><input id="alatSatuan" list="satList" class="finput" placeholder="jam, hari…"></div>
             <div class="fgroup"><label class="flabel">Harga Sewa (Rp) <span class="req">*</span></label><input id="alatHarga" type="number" step="any" min="0" class="finput" placeholder="0"></div>
           </div>
-          <div class="fgroup"><label class="flabel">Vendor / Supplier</label><input id="alatVendor" list="vendorList" class="finput" placeholder="Nama vendor penyedia alat"></div>
+          <div class="fgroup">
+            <label class="flabel">Vendor / Supplier Alat</label>
+            <div class="vnd-wrap" id="alatVendorWrap">
+              <div class="vnd-input-row">
+                <input type="text" class="vnd-search" id="alatVendorSearch" placeholder="Ketik nama vendor…" autocomplete="off"
+                  oninput="vndFilter('alat')" onfocus="vndOpen('alat')" onkeydown="vndKey(event,'alat')">
+                <button type="button" class="vnd-caret" id="alatVendorCaret"
+                  onclick="document.getElementById('alatVendor').value?vndClear('alat'):vndToggle('alat')" tabindex="-1">
+                  <i class="fas fa-chevron-down" id="alatVendorCaretIco"></i>
+                </button>
+              </div>
+              <div class="vnd-badge" id="alatVendorBadge" style="display:none">
+                <i class="fas fa-store"></i><strong id="alatVendorBadgeTxt">—</strong>
+              </div>
+              <div class="vnd-dropdown" id="alatVendorDrop"></div>
+            </div>
+            <input type="hidden" id="alatVendor">
+          </div>
           <button class="btn btn-primary btn-full" onclick="saveAlat()"><i class="fas fa-save"></i> SIMPAN ALAT</button>
           <button class="btn btn-secondary btn-full" id="alatCancelBtn" onclick="cancelEditAlat()" style="margin-top:7px;display:none"><i class="fas fa-times"></i> Batal Edit</button>
         </div>
@@ -359,7 +417,7 @@ button{font-family:var(--fbody)}
    ============================================================ */
 
 // ── CONFIG ───────────────────────────────────────────────────
-const API_URL = 'https://script.google.com/macros/s/AKfycbwwxSHe-Ng1KZKLXMJ4qL84V7RfMrNa1OkcGJpEFnXCpQ0a0_-s-ihhDu4yxG9HrNoB/exec';
+const API_URL = 'YOUR_GAS_WEBAPP_URL';
 
 // ── RBAC ─────────────────────────────────────────────────────
 const ROLE_PERMS = {
@@ -566,7 +624,7 @@ function skeletonRows(cols, count = 5) {
 }
 
 // ── STATE ─────────────────────────────────────────────────────
-let materials=[], upahList=[], alatList=[], analisaData=[];
+let materials=[], upahList=[], alatList=[], vendorDB=[], analisaData=[];
 let matFiltered=[], matPage=1, matPerPage=25, matSortKey='', matSortAsc=true;
 let currentTab='material';
 const VALID_TABS=['material','upah','alat','analisa'];
@@ -649,20 +707,42 @@ function demoAlat(){return[
   {id:'ALT-0004',nama:'Tower Crane 30 ton',satuan:'hari',harga:3500000,vendor:'PT Heavy Lift'},
 ];}
 
+function demoVendors(){return[
+  {id:'VND-0001',namaVendor:'PT Holcim Indonesia',kota:'Jakarta',kategori:'Semen & Beton',status:'Aktif'},
+  {id:'VND-0002',namaVendor:'PT Krakatau Steel',kota:'Cilegon',kategori:'Besi & Baja',status:'Aktif'},
+  {id:'VND-0003',namaVendor:'PT Roman Tiles',kota:'Bekasi',kategori:'Keramik & Granit',status:'Aktif'},
+  {id:'VND-0004',namaVendor:'CV Mitra Cat',kota:'Bandung',kategori:'Finishing',status:'Aktif'},
+  {id:'VND-0005',namaVendor:'PT Wavin Indonesia',kota:'Tangerang',kategori:'Plumbing',status:'Aktif'},
+  {id:'VND-0006',namaVendor:'CV Pasir Jaya',kota:'Solo',kategori:'Material Bangunan',status:'Aktif'},
+  {id:'VND-0007',namaVendor:'PT Ispatindo',kota:'Surabaya',kategori:'Besi & Baja',status:'Aktif'},
+  {id:'VND-0008',namaVendor:'UD Kayu Mas',kota:'Semarang',kategori:'Kayu & Plywood',status:'Aktif'},
+  {id:'VND-0009',namaVendor:'PT Sewa Alat',kota:'Jakarta',kategori:'Alat & Mesin',status:'Aktif'},
+  {id:'VND-0010',namaVendor:'CV Rental Konstruksi',kota:'Depok',kategori:'Alat & Mesin',status:'Aktif'},
+  {id:'VND-0011',namaVendor:'PT Tiga Roda',kota:'Jakarta',kategori:'Semen & Beton',status:'Aktif'},
+  {id:'VND-0012',namaVendor:'PT Platinum',kota:'Surabaya',kategori:'Keramik & Granit',status:'Aktif'},
+];}
+
 // ── API / DEMO ─────────────────────────────────────────────────
 const isDemo=()=>API_URL==='YOUR_GAS_WEBAPP_URL';
 
 async function loadAll(){
-  if(isDemo()){ materials=demoMaterials(); upahList=demoUpah(); alatList=demoAlat(); }
+  if(isDemo()){ materials=demoMaterials(); upahList=demoUpah(); alatList=demoAlat(); vendorDB=demoVendors(); }
   else {
     try {
-      const [rm,ru,ra]=await Promise.all([QSApi.get('getMaterials',{limit:2000}),QSApi.get('getUpah'),QSApi.get('getAlat')]);
+      const [rm,ru,ra,rv]=await Promise.all([
+        QSApi.get('getMaterials',{limit:2000}),QSApi.get('getUpah'),
+        QSApi.get('getAlat'),QSApi.get('getVendors',{limit:1000,status:'Aktif'})
+      ]);
       if(rm.success)materials=rm.data||[];
       if(ru.success)upahList=ru.data||[];
       if(ra.success)alatList=ra.data||[];
-    } catch(e){ materials=demoMaterials(); upahList=demoUpah(); alatList=demoAlat(); }
+      if(rv.success)vendorDB=rv.data||[];
+    } catch(e){ materials=demoMaterials(); upahList=demoUpah(); alatList=demoAlat(); vendorDB=demoVendors(); }
   }
-  buildDataLists(); renderMaterial(); renderUpah(); renderAlat();
+  buildDataLists();
+  vndBuild('mat');
+  vndBuild('alat');
+  renderMaterial(); renderUpah(); renderAlat();
 }
 
 async function loadAnalisa(){
@@ -696,15 +776,152 @@ function buildAnalisaFromMaterials(mats){
 function buildDataLists(){
   const cats=[...new Set(materials.map(m=>m.kategori).filter(Boolean))].sort();
   const subs=[...new Set(materials.map(m=>m.subKategori).filter(Boolean))].sort();
-  const vendors=[...new Set([...materials.map(m=>m.vendor),...alatList.map(a=>a.vendor)].filter(Boolean))].sort();
   document.getElementById('catList').innerHTML=cats.map(c=>`<option value="${c}">`).join('');
   document.getElementById('subList').innerHTML=subs.map(s=>`<option value="${s}">`).join('');
-  document.getElementById('vendorList').innerHTML=vendors.map(v=>`<option value="${v}">`).join('');
   const katSel=document.getElementById('matFilterKat');
   katSel.innerHTML='<option value="">Semua Kategori</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
   const anKat=document.getElementById('analisaKatFilter');
   anKat.innerHTML='<option value="">Semua Kategori</option>'+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
 }
+
+// ══════════════════════════════════════════════════════════════
+// VENDOR SEARCHABLE DROPDOWN ENGINE
+// ctx = 'mat' | 'alat'
+// ══════════════════════════════════════════════════════════════
+const VND_STATE = { mat:{ open:false, kbd:-1 }, alat:{ open:false, kbd:-1 } };
+
+// Build/rebuild dropdown options from vendorDB
+function vndBuild(ctx){
+  const q = (document.getElementById(`${ctx}VendorSearch`)?.value || '').toLowerCase().trim();
+  const activeOnly = vendorDB.filter(v => v.status !== 'Nonaktif');
+  const filtered = q
+    ? activeOnly.filter(v => v.namaVendor.toLowerCase().includes(q) || (v.kota||'').toLowerCase().includes(q) || (v.kategori||'').toLowerCase().includes(q))
+    : activeOnly;
+
+  const currentVal = document.getElementById(`${ctx}Vendor`)?.value || '';
+  const drop = document.getElementById(`${ctx}VendorDrop`);
+  if (!drop) return;
+
+  if (!filtered.length) {
+    drop.innerHTML = `<div class="vnd-empty"><i class="fas fa-store-slash"></i>${q ? 'Vendor tidak ditemukan' : 'Belum ada vendor'}</div>`;
+    return;
+  }
+
+  drop.innerHTML = filtered.map((v, i) => `
+    <div class="vnd-opt ${v.namaVendor===currentVal?'is-selected':''}" data-val="${v.namaVendor}" data-idx="${i}"
+      onmousedown="vndSelect('${ctx}','${v.namaVendor.replace(/'/g,"\\'")}',event)">
+      <div class="vnd-opt-ico"><i class="fas fa-store"></i></div>
+      <div class="vnd-opt-body">
+        <div class="vnd-opt-name">${v.namaVendor}</div>
+        <div class="vnd-opt-meta">${v.kategori||'—'} &bull; ${v.kota||'—'}</div>
+      </div>
+      ${v.namaVendor===currentVal?'<i class="fas fa-check" style="color:var(--primary);font-size:10px"></i>':''}
+    </div>`).join('');
+}
+
+function vndOpen(ctx){
+  VND_STATE[ctx].open = true;
+  VND_STATE[ctx].kbd  = -1;
+  document.getElementById(`${ctx}VendorDrop`).classList.add('open');
+  document.getElementById(`${ctx}VendorCaretIco`).style.transform = 'rotate(180deg)';
+  vndBuild(ctx);
+}
+
+function vndClose(ctx){
+  VND_STATE[ctx].open = false;
+  VND_STATE[ctx].kbd  = -1;
+  document.getElementById(`${ctx}VendorDrop`)?.classList.remove('open');
+  const ico = document.getElementById(`${ctx}VendorCaretIco`);
+  if(ico) ico.style.transform = '';
+  // Restore search text to selected vendor name (if any)
+  const val = document.getElementById(`${ctx}Vendor`)?.value || '';
+  const el  = document.getElementById(`${ctx}VendorSearch`);
+  if(el) el.value = val ? '' : '';
+}
+
+function vndToggle(ctx){
+  if(VND_STATE[ctx].open) vndClose(ctx); else vndOpen(ctx);
+}
+
+function vndFilter(ctx){
+  if(!VND_STATE[ctx].open) vndOpen(ctx);
+  VND_STATE[ctx].kbd = -1;
+  vndBuild(ctx);
+}
+
+function vndSelect(ctx, val, event){
+  if(event) event.preventDefault(); // prevent blur before select
+  document.getElementById(`${ctx}Vendor`).value = val;
+  document.getElementById(`${ctx}VendorSearch`).value = '';
+  // Show badge
+  document.getElementById(`${ctx}VendorBadge`).style.display = 'inline-flex';
+  document.getElementById(`${ctx}VendorBadgeTxt`).textContent = val;
+  // Caret becomes clear button
+  const caret = document.getElementById(`${ctx}VendorCaret`);
+  caret.classList.add('has-val');
+  caret.title = 'Hapus pilihan';
+  document.getElementById(`${ctx}VendorCaretIco`).className = 'fas fa-times';
+  vndClose(ctx);
+  toast(`Vendor dipilih: ${val}`, 'info', 1500);
+}
+
+function vndClear(ctx){
+  document.getElementById(`${ctx}Vendor`).value = '';
+  document.getElementById(`${ctx}VendorSearch`).value = '';
+  document.getElementById(`${ctx}VendorBadge`).style.display = 'none';
+  const caret = document.getElementById(`${ctx}VendorCaret`);
+  caret.classList.remove('has-val');
+  caret.title = '';
+  document.getElementById(`${ctx}VendorCaretIco`).className = 'fas fa-chevron-down';
+  vndBuild(ctx);
+}
+
+// Keyboard navigation (arrow up/down, enter, escape)
+function vndKey(e, ctx){
+  const drop  = document.getElementById(`${ctx}VendorDrop`);
+  const opts  = drop.querySelectorAll('.vnd-opt');
+  const state = VND_STATE[ctx];
+  if(!state.open && (e.key==='ArrowDown'||e.key==='Enter')){ vndOpen(ctx); return; }
+  if(e.key==='Escape'){ vndClose(ctx); return; }
+  if(e.key==='ArrowDown'){
+    e.preventDefault();
+    state.kbd = Math.min(state.kbd+1, opts.length-1);
+    opts.forEach((o,i)=>o.classList.toggle('kbd-focus',i===state.kbd));
+    opts[state.kbd]?.scrollIntoView({block:'nearest'});
+  } else if(e.key==='ArrowUp'){
+    e.preventDefault();
+    state.kbd = Math.max(state.kbd-1, 0);
+    opts.forEach((o,i)=>o.classList.toggle('kbd-focus',i===state.kbd));
+    opts[state.kbd]?.scrollIntoView({block:'nearest'});
+  } else if(e.key==='Enter'&&state.kbd>=0){
+    e.preventDefault();
+    const val = opts[state.kbd]?.dataset.val;
+    if(val) vndSelect(ctx, val, null);
+  }
+}
+
+// Set vendor value programmatically (used when editing)
+function vndSetValue(ctx, val){
+  document.getElementById(`${ctx}Vendor`).value = val || '';
+  document.getElementById(`${ctx}VendorSearch`).value = '';
+  if(val){
+    document.getElementById(`${ctx}VendorBadge`).style.display='inline-flex';
+    document.getElementById(`${ctx}VendorBadgeTxt`).textContent=val;
+    const caret=document.getElementById(`${ctx}VendorCaret`);
+    caret.classList.add('has-val'); caret.title='Hapus pilihan';
+    document.getElementById(`${ctx}VendorCaretIco`).className='fas fa-times';
+  } else {
+    vndClear(ctx);
+  }
+}
+
+// Close dropdown when clicking outside
+document.addEventListener('click', e=>{
+  ['mat','alat'].forEach(ctx=>{
+    const wrap=document.getElementById(`${ctx}VendorWrap`);
+    if(wrap && !wrap.contains(e.target)) vndClose(ctx);
+  });
+});
 
 // ── MATERIAL RENDER ────────────────────────────────────────────
 const debouncedMatFilter=debounce(()=>{matPage=1;renderMaterial();});
@@ -781,7 +998,7 @@ function editMaterial(id){
   document.getElementById('matSpek').value=m.spesifikasi||'';
   document.getElementById('matHarga').value=m.harga;
   document.getElementById('matSatuan').value=m.satuan||'';
-  document.getElementById('matVendor').value=m.vendor||'';
+  vndSetValue('mat', m.vendor||'');
   document.getElementById('matFormTitle').textContent='Edit Material';
   document.getElementById('matSaveLbl').textContent='UPDATE MATERIAL';
   document.getElementById('matCancelBtn').style.display='block';
@@ -790,7 +1007,8 @@ function editMaterial(id){
 }
 
 function cancelEditMaterial(){
-  ['matEditId','matKategori','matSub','matNama','matSpek','matHarga','matSatuan','matVendor'].forEach(id=>document.getElementById(id).value='');
+  ['matEditId','matKategori','matSub','matNama','matSpek','matHarga','matSatuan'].forEach(id=>document.getElementById(id).value='');
+  vndClear('mat');
   document.getElementById('matFormTitle').textContent='Input Material';
   document.getElementById('matSaveLbl').textContent='SIMPAN MATERIAL';
   document.getElementById('matCancelBtn').style.display='none';
@@ -842,8 +1060,21 @@ async function saveAlat(){
   if(isDemo()){if(id){const i=alatList.findIndex(a=>a.id===id);if(i!==-1)alatList[i]={...alatList[i],...data};}else{data.id='ALT-'+String(alatList.length+1).padStart(4,'0');alatList.unshift(data);}cancelEditAlat();renderAlat();toast(id?'Alat diperbarui!':'Alat ditambahkan!');return;}
   try{const r=await QSApi.post({action:id?'updateAlat':'addAlat',data});if(r.success){toast(r.message);cancelEditAlat();await loadAll();}else toast(r.message,'error');}catch(e){toast('Error','error');}
 }
-function editAlat(id){const a=alatList.find(x=>x.id===id);if(!a)return;document.getElementById('alatEditId').value=a.id;document.getElementById('alatNama').value=a.nama;document.getElementById('alatSatuan').value=a.satuan||'';document.getElementById('alatHarga').value=a.harga;document.getElementById('alatVendor').value=a.vendor||'';document.getElementById('alatCancelBtn').style.display='block';openTab('alat');}
-function cancelEditAlat(){['alatEditId','alatNama','alatSatuan','alatHarga','alatVendor'].forEach(id=>document.getElementById(id).value='');document.getElementById('alatCancelBtn').style.display='none';}
+function editAlat(id){
+  const a=alatList.find(x=>x.id===id);if(!a)return;
+  document.getElementById('alatEditId').value=a.id;
+  document.getElementById('alatNama').value=a.nama;
+  document.getElementById('alatSatuan').value=a.satuan||'';
+  document.getElementById('alatHarga').value=a.harga;
+  vndSetValue('alat', a.vendor||'');
+  document.getElementById('alatCancelBtn').style.display='block';
+  openTab('alat');
+}
+function cancelEditAlat(){
+  ['alatEditId','alatNama','alatSatuan','alatHarga'].forEach(id=>document.getElementById(id).value='');
+  vndClear('alat');
+  document.getElementById('alatCancelBtn').style.display='none';
+}
 function deleteAlat(id,nama){showConfirm('Hapus Alat',`Hapus "${nama}"?`,async()=>{if(isDemo()){alatList=alatList.filter(a=>a.id!==id);renderAlat();toast('Dihapus','info');return;}try{const r=await QSApi.post({action:'deleteAlat',id});if(r.success){toast(r.message);await loadAll();}else toast(r.message,'error');}catch(e){toast('Error','error');}});}
 
 // ── ANALISA HARGA ─────────────────────────────────────────────
